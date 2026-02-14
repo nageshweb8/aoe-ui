@@ -8,6 +8,7 @@ import {
   Settings,
   CopyPlus,
   HelpCircle,
+  FileCheck,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -32,6 +33,12 @@ export const navigation: readonly NavSection[] = [
       { title: 'Walk Throughs', path: '/walk-throughs', icon: Footprints },
       { title: 'Expenses', path: '/expenses', icon: Receipt },
       { title: 'Rent Roll', path: '/rent-roll', icon: ScrollText },
+    ],
+  },
+  {
+    label: 'Certificate of Insurance',
+    items: [
+      { title: 'COI Verification', path: '/certificate-of-insurance', icon: FileCheck },
     ],
   },
   {
