@@ -3,8 +3,7 @@
     /* ── Language & Environment ──────────────────────────────────── */
     "target": "ES2022",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "jsx": "preserve",
-
+    "jsx": "react-jsx",
     /* ── Module Resolution ───────────────────────────────────────── */
     "module": "esnext",
     "moduleResolution": "bundler",
@@ -12,7 +11,6 @@
     "esModuleInterop": true,
     "allowJs": true,
     "isolatedModules": true,
-
     /* ── Strict Type Checking ────────────────────────────────────── */
     "strict": true,
     "strictNullChecks": true,
@@ -22,7 +20,6 @@
     "noImplicitAny": true,
     "noImplicitThis": true,
     "useUnknownInCatchVariables": true,
-
     /* ── Additional Safety Checks ────────────────────────────────── */
     "noUncheckedIndexedAccess": true,
     "noImplicitReturns": true,
@@ -30,19 +27,19 @@
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "forceConsistentCasingInFileNames": true,
-
     /* ── Unused Code (enforced via ESLint for flexibility) ───────── */
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-
     /* ── Emit & Build ────────────────────────────────────────────── */
     "noEmit": true,
     "incremental": true,
     "skipLibCheck": true,
-
     /* ── Next.js Plugin ──────────────────────────────────────────── */
-    "plugins": [{ "name": "next" }],
-
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     /* ── Path Aliases ────────────────────────────────────────────── */
     "paths": {
       "@/*": ["./src/*"],
@@ -53,6 +50,12 @@
       "@shared/*": ["./src/shared/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
   "exclude": ["node_modules"]
 }

@@ -1,27 +1,19 @@
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-
-import { FlatCompat } from '@eslint/eslintrc';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
+import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
+import prettier from 'eslint-config-prettier';
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
 
 /** @type {import('eslint').Linter.Config[]} */
 const eslintConfig = [
-  // ─── Next.js + TypeScript base ───────────────────────────────────
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
+  // ─── Next.js + TypeScript + Core Web Vitals (native flat config) ─
+  ...nextCoreWebVitals,
 
   // ─── Prettier (must come after all other configs) ────────────────
-  ...compat.extends('prettier'),
+  prettier,
 
   // ─── Import sorting ──────────────────────────────────────────────
   {
     plugins: {
-      'simple-import-sort': (await import('eslint-plugin-simple-import-sort')).default,
+      'simple-import-sort': simpleImportSort,
     },
     rules: {
       'simple-import-sort/imports': [
@@ -50,10 +42,10 @@ const eslintConfig = [
     },
   },
 
-  // ─── Strict TypeScript & React rules ─────────────────────────────
+  // ─── Strict TypeScript rules (scoped to TS/TSX files) ─────────────
   {
+    files: ['**/*.ts', '**/*.tsx'],
     rules: {
-      // TypeScript strict rules
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': [
         'error',
@@ -69,9 +61,14 @@ const eslintConfig = [
       ],
       '@typescript-eslint/no-import-type-side-effects': 'error',
       '@typescript-eslint/no-non-null-assertion': 'warn',
-      '@typescript-eslint/prefer-nullish-coalescing': 'off', // requires strict TS project service
-      '@typescript-eslint/prefer-optional-chain': 'off', // requires strict TS project service
+      '@typescript-eslint/prefer-nullish-coalescing': 'off',
+      '@typescript-eslint/prefer-optional-chain': 'off',
+    },
+  },
 
+  // ─── React & general best practices ──────────────────────────────
+  {
+    rules: {
       // React best practices
       'react/jsx-no-leaked-render': ['warn', { validStrategies: ['ternary', 'coerce'] }],
       'react/self-closing-comp': 'error',
@@ -88,7 +85,7 @@ const eslintConfig = [
       eqeqeq: ['error', 'always', { null: 'ignore' }],
       curly: ['error', 'all'],
       'no-nested-ternary': 'warn',
-      'no-duplicate-imports': 'off', // handled by simple-import-sort
+      'no-duplicate-imports': 'off',
     },
   },
 

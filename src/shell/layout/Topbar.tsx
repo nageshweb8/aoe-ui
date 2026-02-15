@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import { useTheme as useNextTheme } from 'next-themes';
 
 import AppBar from '@mui/material/AppBar';
@@ -16,6 +16,8 @@ import { Bell, Menu, Moon, Search, Sun } from 'lucide-react';
 import { TOPBAR_HEIGHT } from '../constants';
 import { toggleSidebar, useAppDispatch } from '../store';
 
+const emptySubscribe = () => () => {};
+
 interface TopbarProps {
   readonly drawerWidth: number;
 }
@@ -24,11 +26,11 @@ export function Topbar({ drawerWidth }: TopbarProps) {
   const theme = useTheme();
   const dispatch = useAppDispatch();
   const { resolvedTheme, setTheme } = useNextTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
 
   const handleThemeToggle = () => {
     setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');

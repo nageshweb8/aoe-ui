@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useState, useSyncExternalStore } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { ThemeProvider as NextThemesProvider, useTheme } from 'next-themes';
 
@@ -26,13 +26,20 @@ const globalStyles = (
   />
 );
 
+const emptySubscribe = () => () => {};
+
+/** Detect client-side mount without triggering react-hooks/set-state-in-effect */
+function useIsMounted() {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
+}
+
 function MuiThemeBridge({ children }: ProvidersProps) {
   const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useIsMounted();
 
   const muiTheme = resolvedTheme === 'dark' ? darkTheme : lightTheme;
 
