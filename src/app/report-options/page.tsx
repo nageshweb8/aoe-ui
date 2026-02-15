@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import { PageShell } from '@/components/common';
+import { ReportOptionsPage } from '@modules/report-options';
 
 export const metadata: Metadata = { title: 'Report Options' };
 
-export default function ReportOptionsPage() {
-  return <PageShell title="Report Options" description="Configure and generate escalation reports" />;
+export default function Page() {
+  return <ReportOptionsPage />;
 }

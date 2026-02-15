@@ -1,0 +1,1 @@
+export { CertificateOfInsurancePage } from './CertificateOfInsurancePage';

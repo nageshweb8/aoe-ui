@@ -1,0 +1,1 @@
+export { verifyCOIDocument } from './coiService';

@@ -1,0 +1,1 @@
+export { RentRollPage } from './RentRollPage';
