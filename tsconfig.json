@@ -15,7 +15,12 @@
     "incremental": true,
     "plugins": [{ "name": "next" }],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@shell": ["./src/shell"],
+      "@shell/*": ["./src/shell/*"],
+      "@modules/*": ["./src/modules/*"],
+      "@shared": ["./src/shared"],
+      "@shared/*": ["./src/shared/*"]
     },
     "forceConsistentCasingInFileNames": true,
     "noUncheckedIndexedAccess": true,

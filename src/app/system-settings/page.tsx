@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import { PageShell } from '@/components/common';
+import { SystemSettingsPage } from '@modules/system-settings';
 
 export const metadata: Metadata = { title: 'System Settings' };
 
-export default function SystemSettingsPage() {
-  return <PageShell title="System Settings" description="Configure system preferences and parameters" />;
+export default function Page() {
+  return <SystemSettingsPage />;
 }

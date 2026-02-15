@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import { PageShell } from '@/components/common';
+import { ErrorCheckingPage } from '@modules/error-checking';
 
 export const metadata: Metadata = { title: 'Error Checking' };
 
-export default function ErrorCheckingPage() {
-  return <PageShell title="Error Checking" description="Review and resolve data validation errors" />;
+export default function Page() {
+  return <ErrorCheckingPage />;
 }

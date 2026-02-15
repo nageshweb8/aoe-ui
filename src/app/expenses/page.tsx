@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import { PageShell } from '@/components/common';
+import { ExpensesPage } from '@modules/expenses';
 
 export const metadata: Metadata = { title: 'Expenses' };
 
-export default function ExpensesPage() {
-  return <PageShell title="Expenses" description="Track and manage building expenses" />;
+export default function Page() {
+  return <ExpensesPage />;
 }
