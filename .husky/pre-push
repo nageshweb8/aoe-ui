@@ -7,7 +7,7 @@ npx tsc --noEmit || {
 }
 
 # Full ESLint scan
-npx next lint --max-warnings 0 || {
+npx eslint . --max-warnings 0 || {
   echo "❌ ESLint errors found. Push blocked."
   exit 1
 }
