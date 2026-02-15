@@ -1,11 +1,18 @@
 import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 
 import { AdminLayout, AOE_BRAND, Providers } from '@shell';
 
 import './globals.css';
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
 
 export const metadata: Metadata = {
   title: {
@@ -22,7 +29,7 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <body>
         <AppRouterCacheProvider options={{ key: 'mui' }}>
           <Providers>

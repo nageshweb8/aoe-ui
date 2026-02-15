@@ -98,9 +98,14 @@ const eslintConfig = [
         {
           patterns: [
             {
-              group: ['@modules/!(${0})/**', '@modules/!(${0})'],
+              group: ['@modules/*'],
               message:
-                'Modules must not import from other modules. Use @shared or @shell abstractions.',
+                'Use relative imports within your own module. Cross-module imports via @modules/* are forbidden.',
+            },
+            {
+              group: ['@shell', '@shell/*'],
+              message:
+                'Modules must not import from the shell layer. Use @shared abstractions instead.',
             },
           ],
         },

@@ -5,7 +5,7 @@ import { createTheme, type ThemeOptions } from '@mui/material/styles';
 const AOE_PRIMARY = '#be3527';
 
 const sharedTypography: ThemeOptions['typography'] = {
-  fontFamily: '"Inter", "Roboto", "Helvetica Neue", Arial, sans-serif',
+  fontFamily: 'var(--font-inter, "Inter", "Roboto", "Helvetica Neue", Arial, sans-serif)',
   h1: { fontWeight: 700, fontSize: '2rem', lineHeight: 1.25 },
   h2: { fontWeight: 700, fontSize: '1.5rem', lineHeight: 1.3 },
   h3: { fontWeight: 600, fontSize: '1.25rem', lineHeight: 1.35 },
