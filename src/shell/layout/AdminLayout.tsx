@@ -1,14 +1,16 @@
 'use client';
 
 import { type ReactNode, useEffect } from 'react';
-import Box from '@mui/material/Box';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import { useTheme } from '@mui/material/styles';
 
-import { useAppSelector, useAppDispatch, setSidebarOpen } from '../store';
+import Box from '@mui/material/Box';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+
+import { SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH, TOPBAR_HEIGHT } from '../constants';
+import { setSidebarOpen, useAppDispatch, useAppSelector } from '../store';
+
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
-import { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH, TOPBAR_HEIGHT } from '../constants';
 
 interface AdminLayoutProps {
   readonly children: ReactNode;

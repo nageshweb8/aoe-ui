@@ -1,7 +1,7 @@
 import type { COIVerificationResponse } from '../types/coi';
 
-const COI_API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL
-  ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/coi`
+const COI_API_BASE = process.env['NEXT_PUBLIC_API_BASE_URL']
+  ? `${process.env['NEXT_PUBLIC_API_BASE_URL']}/api/coi`
   : '/api/coi';
 
 /**
@@ -23,9 +23,7 @@ export async function verifyCOIDocument(file: File): Promise<COIVerificationResp
 
   if (!response.ok) {
     const errorBody = await response.text().catch(() => 'Unknown error');
-    throw new Error(
-      `COI verification failed (${response.status}): ${errorBody}`,
-    );
+    throw new Error(`COI verification failed (${response.status}): ${errorBody}`);
   }
 
   const data: COIVerificationResponse = await response.json();

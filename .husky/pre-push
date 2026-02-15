@@ -1,0 +1,15 @@
+echo "🔒 Pre-push checks: TypeScript + ESLint full scan..."
+
+# TypeScript type checking (entire project)
+npx tsc --noEmit || {
+  echo "❌ TypeScript errors found. Push blocked."
+  exit 1
+}
+
+# Full ESLint scan
+npx next lint --max-warnings 0 || {
+  echo "❌ ESLint errors found. Push blocked."
+  exit 1
+}
+
+echo "✅ All pre-push checks passed."

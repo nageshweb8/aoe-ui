@@ -1,9 +1,9 @@
-import Typography from '@mui/material/Typography';
-import Grid from '@mui/material/Grid2';
 import Box from '@mui/material/Box';
-import { Building2, DollarSign, AlertTriangle, TrendingUp } from 'lucide-react';
+import Grid from '@mui/material/Grid2';
+import Typography from '@mui/material/Typography';
+import { AlertTriangle, Building2, DollarSign, TrendingUp } from 'lucide-react';
 
-import { StatCard, ChartPlaceholder } from '../components';
+import { ChartPlaceholder, StatCard } from '../components';
 
 export function DashboardPage() {
   return (
@@ -68,11 +68,7 @@ export function DashboardPage() {
           />
         </Grid>
         <Grid size={{ xs: 12, lg: 4 }}>
-          <ChartPlaceholder
-            title="Expense Distribution"
-            subtitle="By category"
-            height={340}
-          />
+          <ChartPlaceholder title="Expense Distribution" subtitle="By category" height={340} />
         </Grid>
         <Grid size={{ xs: 12, lg: 6 }}>
           <ChartPlaceholder

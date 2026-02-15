@@ -14,8 +14,8 @@ export { CertificateOfInsurancePage } from './views';
 
 // Re-export types for consumers that need them
 export type {
-  COIVerificationResponse,
   COIPolicy,
   COIPolicyExpiration,
   COIUploadStatus,
+  COIVerificationResponse,
 } from './types';

@@ -1,19 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTheme as useNextTheme } from 'next-themes';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Box from '@mui/material/Box';
-import Avatar from '@mui/material/Avatar';
-import Tooltip from '@mui/material/Tooltip';
-import InputBase from '@mui/material/InputBase';
-import { useTheme, alpha } from '@mui/material/styles';
-import { Menu, Sun, Moon, Search, Bell } from 'lucide-react';
 
-import { useAppDispatch, toggleSidebar } from '../store';
+import AppBar from '@mui/material/AppBar';
+import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
+import InputBase from '@mui/material/InputBase';
+import { alpha, useTheme } from '@mui/material/styles';
+import Toolbar from '@mui/material/Toolbar';
+import Tooltip from '@mui/material/Tooltip';
+import { Bell, Menu, Moon, Search, Sun } from 'lucide-react';
+
 import { TOPBAR_HEIGHT } from '../constants';
+import { toggleSidebar, useAppDispatch } from '../store';
 
 interface TopbarProps {
   readonly drawerWidth: number;
@@ -109,7 +110,7 @@ export function Topbar({ drawerWidth }: TopbarProps) {
           </Tooltip>
 
           {/* Theme Toggle */}
-          {mounted && (
+          {mounted ? (
             <Tooltip title={resolvedTheme === 'dark' ? 'Light mode' : 'Dark mode'}>
               <IconButton
                 onClick={handleThemeToggle}
@@ -119,7 +120,7 @@ export function Topbar({ drawerWidth }: TopbarProps) {
                 {resolvedTheme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
               </IconButton>
             </Tooltip>
-          )}
+          ) : null}
 
           {/* Avatar */}
           <Tooltip title="Account">

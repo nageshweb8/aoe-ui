@@ -1,7 +1,7 @@
+import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
 
 interface ChartPlaceholderProps {
   readonly title: string;
@@ -17,11 +17,11 @@ export function ChartPlaceholder({ title, subtitle, height = 300 }: ChartPlaceho
           <Typography variant="h5" sx={{ fontWeight: 600 }}>
             {title}
           </Typography>
-          {subtitle && (
+          {subtitle ? (
             <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
               {subtitle}
             </Typography>
-          )}
+          ) : null}
         </Box>
         <Box
           sx={{

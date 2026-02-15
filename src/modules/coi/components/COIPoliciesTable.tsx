@@ -3,8 +3,8 @@
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
+import { alpha, useTheme } from '@mui/material/styles';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -12,7 +12,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Tooltip from '@mui/material/Tooltip';
-import { useTheme, alpha } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import { AlertTriangle, CheckCircle } from 'lucide-react';
 
 import type { COIPolicy } from '../types/coi';
@@ -68,21 +68,24 @@ export function COIPoliciesTable({ policies }: COIPoliciesTableProps) {
                   >
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        {policy.insurerLetter && (
+                        {policy.insurerLetter ? (
                           <Chip
                             label={policy.insurerLetter}
                             size="small"
                             variant="outlined"
                             sx={{ minWidth: 28, fontWeight: 700 }}
                           />
-                        )}
+                        ) : null}
                         <Typography variant="body2" sx={{ fontWeight: 500 }}>
                           {policy.typeOfInsurance}
                         </Typography>
                       </Box>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.8125rem' }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontFamily: 'monospace', fontSize: '0.8125rem' }}
+                      >
                         {policy.policyNumber}
                       </Typography>
                     </TableCell>
@@ -92,7 +95,13 @@ export function COIPoliciesTable({ policies }: COIPoliciesTableProps) {
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" sx={{ fontWeight: expired ? 700 : 400, color: expired ? 'error.main' : 'text.primary' }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: expired ? 700 : 400,
+                          color: expired ? 'error.main' : 'text.primary',
+                        }}
+                      >
                         {formatPolicyDate(policy.policyExpirationDate)}
                       </Typography>
                     </TableCell>
@@ -144,7 +153,10 @@ export function COIPoliciesTable({ policies }: COIPoliciesTableProps) {
                     bgcolor: alpha(theme.palette.divider, 0.3),
                   }}
                 >
-                  <Typography variant="caption" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}
+                  >
                     {policy.typeOfInsurance}
                   </Typography>
                   <Box
@@ -155,11 +167,15 @@ export function COIPoliciesTable({ policies }: COIPoliciesTableProps) {
                       borderCollapse: 'collapse',
                       '& td': { py: 0.25, fontSize: '0.8125rem' },
                       '& td:first-of-type': { color: 'text.secondary', pr: 2 },
-                      '& td:last-of-type': { fontWeight: 600, fontFamily: 'monospace', textAlign: 'right' },
+                      '& td:last-of-type': {
+                        fontWeight: 600,
+                        fontFamily: 'monospace',
+                        textAlign: 'right',
+                      },
                     }}
                   >
                     <tbody>
-                      {Object.entries(policy.limits!).map(([limitName, limitValue]) => (
+                      {Object.entries(policy.limits ?? {}).map(([limitName, limitValue]) => (
                         <tr key={limitName}>
                           <td>{limitName}</td>
                           <td>{limitValue}</td>

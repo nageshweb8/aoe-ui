@@ -29,11 +29,7 @@ const layoutSlice = createSlice({
   },
 });
 
-export const {
-  toggleSidebar,
-  setSidebarOpen,
-  toggleSidebarCollapse,
-  setSidebarCollapsed,
-} = layoutSlice.actions;
+export const { toggleSidebar, setSidebarOpen, toggleSidebarCollapse, setSidebarCollapsed } =
+  layoutSlice.actions;
 
 export const layoutReducer = layoutSlice.reducer;

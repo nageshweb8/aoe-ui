@@ -3,12 +3,20 @@
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import Grid2 from '@mui/material/Grid2';
-import { useTheme, alpha } from '@mui/material/styles';
-import { ShieldCheck, ShieldAlert, ShieldQuestion, Building, User, FileText, Hash } from 'lucide-react';
+import { alpha, useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
+import {
+  Building,
+  FileText,
+  Hash,
+  ShieldAlert,
+  ShieldCheck,
+  ShieldQuestion,
+  User,
+} from 'lucide-react';
 
 import type { COIVerificationResponse } from '../types/coi';
 
@@ -34,22 +42,27 @@ function InfoBlock({
   readonly value?: string;
   readonly subValue?: string;
 }) {
-  if (!value) return null;
+  if (!value) {
+    return null;
+  }
   return (
     <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
       <Box sx={{ color: 'text.secondary', mt: 0.25 }}>{icon}</Box>
       <Box>
-        <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+        <Typography
+          variant="caption"
+          sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.5 }}
+        >
           {label}
         </Typography>
         <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
           {value}
         </Typography>
-        {subValue && (
+        {subValue ? (
           <Typography variant="body2" sx={{ color: 'text.secondary', whiteSpace: 'pre-line' }}>
             {subValue}
           </Typography>
-        )}
+        ) : null}
       </Box>
     </Box>
   );
@@ -63,7 +76,16 @@ export function COIResultsSummary({ data }: COIResultsSummaryProps) {
     <Card>
       <CardContent sx={{ p: 3 }}>
         {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mb: 2,
+            flexWrap: 'wrap',
+            gap: 1,
+          }}
+        >
           <Typography variant="h5" sx={{ fontWeight: 600 }}>
             Verification Result
           </Typography>
@@ -77,7 +99,7 @@ export function COIResultsSummary({ data }: COIResultsSummaryProps) {
           />
         </Box>
 
-        {data.message && (
+        {data.message ? (
           <Typography
             variant="body2"
             sx={{
@@ -90,13 +112,13 @@ export function COIResultsSummary({ data }: COIResultsSummaryProps) {
           >
             {data.message}
           </Typography>
-        )}
+        ) : null}
 
         <Divider sx={{ mb: 2 }} />
 
         {/* Certificate info */}
         <Grid2 container spacing={3}>
-          {data.certificateNumber && (
+          {data.certificateNumber ? (
             <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
               <InfoBlock
                 icon={<Hash size={16} />}
@@ -104,9 +126,9 @@ export function COIResultsSummary({ data }: COIResultsSummaryProps) {
                 value={data.certificateNumber}
               />
             </Grid2>
-          )}
+          ) : null}
 
-          {data.producer && (
+          {data.producer ? (
             <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
               <InfoBlock
                 icon={<Building size={16} />}
@@ -117,7 +139,7 @@ export function COIResultsSummary({ data }: COIResultsSummaryProps) {
                   .join('\n')}
               />
             </Grid2>
-          )}
+          ) : null}
 
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <InfoBlock
@@ -128,7 +150,7 @@ export function COIResultsSummary({ data }: COIResultsSummaryProps) {
             />
           </Grid2>
 
-          {data.certificateHolder && (
+          {data.certificateHolder ? (
             <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
               <InfoBlock
                 icon={<FileText size={16} />}
@@ -137,11 +159,11 @@ export function COIResultsSummary({ data }: COIResultsSummaryProps) {
                 subValue={data.certificateHolder.address}
               />
             </Grid2>
-          )}
+          ) : null}
         </Grid2>
 
         {/* Insurers */}
-        {data.insurers && data.insurers.length > 0 && (
+        {data.insurers && data.insurers.length > 0 ? (
           <>
             <Divider sx={{ my: 2 }} />
             <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
@@ -158,7 +180,7 @@ export function COIResultsSummary({ data }: COIResultsSummaryProps) {
               ))}
             </Box>
           </>
-        )}
+        ) : null}
       </CardContent>
     </Card>
   );
