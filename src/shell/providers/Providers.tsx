@@ -1,16 +1,17 @@
 'use client';
 
-import { type ReactNode, useState, useEffect } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ThemeProvider as NextThemesProvider, useTheme } from 'next-themes';
-import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
+
 import CssBaseline from '@mui/material/CssBaseline';
 import GlobalStyles from '@mui/material/GlobalStyles';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { store } from '../store';
-import { lightTheme, darkTheme } from '../theme';
+import { darkTheme, lightTheme } from '../theme';
 
 interface ProvidersProps {
   readonly children: ReactNode;

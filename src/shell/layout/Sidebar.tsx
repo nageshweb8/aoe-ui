@@ -1,23 +1,24 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
 import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
+import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
 import { useTheme } from '@mui/material/styles';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
 import { ChevronsLeft, ChevronsRight } from 'lucide-react';
 
+import { AOE_BRAND, SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH, TOPBAR_HEIGHT } from '../constants';
 import { navigation } from '../navigation';
-import { AOE_BRAND, SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH, TOPBAR_HEIGHT } from '../constants';
-import { useAppDispatch, toggleSidebarCollapse } from '../store';
+import { toggleSidebarCollapse, useAppDispatch } from '../store';
 
 interface SidebarProps {
   readonly open: boolean;
@@ -62,7 +63,7 @@ export function Sidebar({ open, collapsed, isMobile, onClose }: SidebarProps) {
           height={36}
           style={{ flexShrink: 0, objectFit: 'contain' }}
         />
-        {(!collapsed || isMobile) && (
+        {!collapsed || isMobile ? (
           <Typography
             variant="subtitle1"
             noWrap={false}
@@ -77,7 +78,7 @@ export function Sidebar({ open, collapsed, isMobile, onClose }: SidebarProps) {
             <br />
             Escalations
           </Typography>
-        )}
+        ) : null}
       </Box>
 
       <Divider />
@@ -94,7 +95,7 @@ export function Sidebar({ open, collapsed, isMobile, onClose }: SidebarProps) {
       >
         {navigation.map((section) => (
           <Box key={section.label ?? 'default'} sx={{ mb: 1.5 }}>
-            {section.label && (!collapsed || isMobile) && (
+            {section.label && (!collapsed || isMobile) ? (
               <Typography
                 variant="overline"
                 sx={{
@@ -109,10 +110,8 @@ export function Sidebar({ open, collapsed, isMobile, onClose }: SidebarProps) {
               >
                 {section.label}
               </Typography>
-            )}
-            {collapsed && !isMobile && section.label && (
-              <Divider sx={{ my: 1 }} />
-            )}
+            ) : null}
+            {collapsed && !isMobile && section.label ? <Divider sx={{ my: 1 }} /> : null}
             <List disablePadding>
               {section.items.map((item) => {
                 const Icon = item.icon;
@@ -140,7 +139,7 @@ export function Sidebar({ open, collapsed, isMobile, onClose }: SidebarProps) {
                     >
                       <Icon size={20} />
                     </ListItemIcon>
-                    {(!collapsed || isMobile) && (
+                    {!collapsed || isMobile ? (
                       <ListItemText
                         primary={item.title}
                         primaryTypographyProps={{
@@ -148,7 +147,7 @@ export function Sidebar({ open, collapsed, isMobile, onClose }: SidebarProps) {
                           fontWeight: isActive ? 600 : 400,
                         }}
                       />
-                    )}
+                    ) : null}
                   </ListItemButton>
                 );
 
@@ -215,7 +214,9 @@ export function Sidebar({ open, collapsed, isMobile, onClose }: SidebarProps) {
   }
 
   // Desktop: persistent sidebar
-  if (!open) return null;
+  if (!open) {
+    return null;
+  }
 
   return (
     <Box

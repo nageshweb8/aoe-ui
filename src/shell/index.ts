@@ -14,24 +14,19 @@
  *  - Shell must NEVER import from `@modules`.
  *  - Only route pages (`src/app/`) compose shell + modules together.
  */
+export { AOE_BRAND, SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH, TOPBAR_HEIGHT } from './constants';
 export { AdminLayout, Sidebar, Topbar } from './layout';
-export { Providers } from './providers';
-export { navigation } from './navigation';
 export type { NavItem, NavSection } from './navigation';
-export { lightTheme, darkTheme } from './theme';
+export { navigation } from './navigation';
+export { Providers } from './providers';
+export type { AppDispatch, RootState } from './store';
 export {
+  setSidebarCollapsed,
+  setSidebarOpen,
   store,
+  toggleSidebar,
+  toggleSidebarCollapse,
   useAppDispatch,
   useAppSelector,
-  toggleSidebar,
-  setSidebarOpen,
-  toggleSidebarCollapse,
-  setSidebarCollapsed,
 } from './store';
-export type { RootState, AppDispatch } from './store';
-export {
-  AOE_BRAND,
-  SIDEBAR_WIDTH,
-  SIDEBAR_COLLAPSED_WIDTH,
-  TOPBAR_HEIGHT,
-} from './constants';
+export { darkTheme, lightTheme } from './theme';

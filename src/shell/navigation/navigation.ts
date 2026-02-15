@@ -1,15 +1,15 @@
 import {
-  LayoutDashboard,
+  AlertTriangle,
+  CopyPlus,
+  FileBarChart,
+  FileCheck,
   Footprints,
+  HelpCircle,
+  LayoutDashboard,
+  type LucideIcon,
   Receipt,
   ScrollText,
-  AlertTriangle,
-  FileBarChart,
   Settings,
-  CopyPlus,
-  HelpCircle,
-  FileCheck,
-  type LucideIcon,
 } from 'lucide-react';
 
 export interface NavItem {
@@ -37,9 +37,7 @@ export const navigation: readonly NavSection[] = [
   },
   {
     label: 'Certificate of Insurance',
-    items: [
-      { title: 'COI Verification', path: '/certificate-of-insurance', icon: FileCheck },
-    ],
+    items: [{ title: 'COI Verification', path: '/certificate-of-insurance', icon: FileCheck }],
   },
   {
     label: 'Tools',

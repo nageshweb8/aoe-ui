@@ -1,1 +1,1 @@
-export { lightTheme, darkTheme } from './theme';
+export { darkTheme, lightTheme } from './theme';

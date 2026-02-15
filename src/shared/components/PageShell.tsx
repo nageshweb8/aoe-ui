@@ -12,11 +12,11 @@ export function PageShell({ title, description }: PageShellProps) {
       <Typography variant="h2" sx={{ fontWeight: 700 }}>
         {title}
       </Typography>
-      {description && (
+      {description ? (
         <Typography variant="body1" sx={{ color: 'text.secondary', mt: 0.5 }}>
           {description}
         </Typography>
-      )}
+      ) : null}
     </Box>
   );
 }

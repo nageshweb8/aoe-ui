@@ -1,23 +1,24 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import Box from '@mui/material/Box';
-import Grid2 from '@mui/material/Grid2';
+import { useCallback, useState } from 'react';
+
 import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Grid2 from '@mui/material/Grid2';
 import { RotateCcw } from 'lucide-react';
 
 import { PageShell } from '@shared/components';
+
 import {
-  COIFileUpload,
-  COIResultsSummary,
-  COIPoliciesTable,
   COIExpirationAlert,
+  COIFileUpload,
+  COIPoliciesTable,
+  COIResultsSummary,
 } from '../components';
 import { verifyCOIDocument } from '../services/coiService';
+import type { COIUploadStatus, COIVerificationResponse } from '../types/coi';
 import { checkExpiredPolicies } from '../utils/coiValidation';
-
-import type { COIVerificationResponse, COIUploadStatus } from '../types/coi';
 
 export function CertificateOfInsurancePage() {
   const [uploadStatus, setUploadStatus] = useState<COIUploadStatus>('idle');
@@ -50,12 +51,21 @@ export function CertificateOfInsurancePage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          mb: 3,
+          flexWrap: 'wrap',
+          gap: 2,
+        }}
+      >
         <PageShell
           title="COI Verification"
           description="Upload a Certificate of Insurance for automated data extraction and expiration validation."
         />
-        {result && (
+        {result ? (
           <Button
             variant="outlined"
             startIcon={<RotateCcw size={16} />}
@@ -64,7 +74,7 @@ export function CertificateOfInsurancePage() {
           >
             New Verification
           </Button>
-        )}
+        ) : null}
       </Box>
 
       {/* Upload phase */}
@@ -80,14 +90,14 @@ export function CertificateOfInsurancePage() {
       )}
 
       {/* Error */}
-      {uploadStatus === 'error' && errorMessage && (
+      {uploadStatus === 'error' && errorMessage ? (
         <Alert severity="error" sx={{ mt: 2 }} onClose={handleReset}>
           {errorMessage}
         </Alert>
-      )}
+      ) : null}
 
       {/* Results phase */}
-      {result && (
+      {result ? (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           {/* Expiration warnings at top */}
           <COIExpirationAlert expirations={expiredPolicies} />
@@ -98,7 +108,7 @@ export function CertificateOfInsurancePage() {
           {/* Policies table */}
           <COIPoliciesTable policies={result.policies} />
         </Box>
-      )}
+      ) : null}
     </Box>
   );
 }

@@ -1,8 +1,10 @@
-import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import type { Metadata } from 'next';
+
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 
-import { Providers, AdminLayout, AOE_BRAND } from '@shell';
+import { AdminLayout, AOE_BRAND, Providers } from '@shell';
+
 import './globals.css';
 
 export const metadata: Metadata = {

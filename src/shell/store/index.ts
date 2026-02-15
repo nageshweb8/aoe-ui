@@ -1,9 +1,9 @@
-export { store } from './store';
-export type { RootState, AppDispatch } from './store';
 export { useAppDispatch, useAppSelector } from './hooks';
 export {
-  toggleSidebar,
-  setSidebarOpen,
-  toggleSidebarCollapse,
   setSidebarCollapsed,
+  setSidebarOpen,
+  toggleSidebar,
+  toggleSidebarCollapse,
 } from './slices/layoutSlice';
+export type { AppDispatch, RootState } from './store';
+export { store } from './store';

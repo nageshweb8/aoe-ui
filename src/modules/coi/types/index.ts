@@ -1,16 +1,11 @@
 export type {
-  COIPolicy,
-  COIProducer,
-  COIInsured,
   COICertificateHolder,
+  COIInsured,
   COIInsurer,
-  COIVerificationResponse,
+  COIPolicy,
   COIPolicyExpiration,
+  COIProducer,
   COIUploadStatus,
+  COIVerificationResponse,
 } from './coi';
-
-export {
-  COI_ACCEPTED_FILE_TYPES,
-  COI_MAX_FILE_SIZE_MB,
-  COI_MAX_FILE_SIZE_BYTES,
-} from './coi';
+export { COI_ACCEPTED_FILE_TYPES, COI_MAX_FILE_SIZE_BYTES, COI_MAX_FILE_SIZE_MB } from './coi';

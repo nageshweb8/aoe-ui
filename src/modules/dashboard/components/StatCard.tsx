@@ -1,8 +1,8 @@
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
 import type { SxProps, Theme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import type { LucideIcon } from 'lucide-react';
 
 interface StatCardProps {
@@ -23,16 +23,13 @@ export function StatCard({ title, value, subtitle, icon: Icon, trend, sx }: Stat
       <CardContent sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <Box>
-            <Typography
-              variant="body2"
-              sx={{ color: 'text.secondary', fontWeight: 500, mb: 0.5 }}
-            >
+            <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500, mb: 0.5 }}>
               {title}
             </Typography>
             <Typography variant="h3" sx={{ fontWeight: 700, mb: 0.5 }}>
               {value}
             </Typography>
-            {trend && (
+            {trend ? (
               <Typography
                 variant="body2"
                 sx={{
@@ -43,12 +40,12 @@ export function StatCard({ title, value, subtitle, icon: Icon, trend, sx }: Stat
               >
                 {trend.positive ? '↑' : '↓'} {trend.value}
               </Typography>
-            )}
-            {subtitle && (
+            ) : null}
+            {subtitle ? (
               <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                 {subtitle}
               </Typography>
-            )}
+            ) : null}
           </Box>
           <Box
             sx={{

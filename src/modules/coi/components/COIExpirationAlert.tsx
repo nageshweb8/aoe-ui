@@ -14,7 +14,9 @@ interface COIExpirationAlertProps {
 }
 
 export function COIExpirationAlert({ expirations }: COIExpirationAlertProps) {
-  if (expirations.length === 0) return null;
+  if (expirations.length === 0) {
+    return null;
+  }
 
   return (
     <Alert
@@ -34,13 +36,18 @@ export function COIExpirationAlert({ expirations }: COIExpirationAlertProps) {
         The following policies are expired as of today and require immediate attention:
       </Typography>
 
-      <Box component="ul" sx={{ m: 0, pl: 2.5, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+      <Box
+        component="ul"
+        sx={{ m: 0, pl: 2.5, display: 'flex', flexDirection: 'column', gap: 0.75 }}
+      >
         {expirations.map((exp) => (
           <li key={`${exp.policyNumber}-${exp.typeOfInsurance}`}>
             <Typography variant="body2" component="span">
-              <strong>{exp.typeOfInsurance}</strong> (Policy #{exp.policyNumber}) —
-              expired on {formatPolicyDate(exp.policyExpirationDate)},{' '}
-              <strong>{exp.daysExpired} day{exp.daysExpired !== 1 ? 's' : ''} ago</strong>
+              <strong>{exp.typeOfInsurance}</strong> (Policy #{exp.policyNumber}) — expired on{' '}
+              {formatPolicyDate(exp.policyExpirationDate)},{' '}
+              <strong>
+                {exp.daysExpired} day{exp.daysExpired !== 1 ? 's' : ''} ago
+              </strong>
             </Typography>
           </li>
         ))}

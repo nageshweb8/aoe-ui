@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+
 import { ExpensesPage } from '@modules/expenses';
 
 export const metadata: Metadata = { title: 'Expenses' };

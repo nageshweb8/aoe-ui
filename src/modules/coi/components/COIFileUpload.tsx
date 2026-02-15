@@ -1,22 +1,23 @@
 'use client';
 
-import { useCallback, useState, useRef, type DragEvent, type ChangeEvent } from 'react';
+import { type ChangeEvent, type DragEvent, useCallback, useRef, useState } from 'react';
+
+import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
 import Chip from '@mui/material/Chip';
+import IconButton from '@mui/material/IconButton';
 import LinearProgress from '@mui/material/LinearProgress';
-import Alert from '@mui/material/Alert';
-import { useTheme, alpha } from '@mui/material/styles';
-import { Upload, FileText, X, FileCheck } from 'lucide-react';
+import { alpha, useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
+import { FileCheck, FileText, Upload, X } from 'lucide-react';
 
 import {
   COI_ACCEPTED_FILE_TYPES,
-  COI_MAX_FILE_SIZE_MB,
   COI_MAX_FILE_SIZE_BYTES,
+  COI_MAX_FILE_SIZE_MB,
 } from '../types/coi';
 
 interface COIFileUploadProps {
@@ -28,13 +29,27 @@ interface COIFileUploadProps {
 const ACCEPTED_EXTENSIONS = Object.values(COI_ACCEPTED_FILE_TYPES).flat().join(', ');
 const ACCEPTED_MIME_TYPES = Object.keys(COI_ACCEPTED_FILE_TYPES);
 
+function getBorderColor(isDragOver: boolean, error: string | null): string {
+  if (isDragOver) {
+    return 'primary.main';
+  }
+  if (error) {
+    return 'error.main';
+  }
+  return 'divider';
+}
+
 function getFileIcon() {
   return <FileText size={28} />;
 }
 
 function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
@@ -152,18 +167,12 @@ export function COIFileUpload({ onFileSelect, isUploading, uploadProgress }: COI
           onClick={!selectedFile ? handleBrowseClick : undefined}
           sx={{
             border: '2px dashed',
-            borderColor: isDragOver
-              ? 'primary.main'
-              : error
-                ? 'error.main'
-                : 'divider',
+            borderColor: getBorderColor(isDragOver, error),
             borderRadius: 2,
             p: { xs: 3, sm: 4 },
             textAlign: 'center',
             cursor: selectedFile ? 'default' : 'pointer',
-            bgcolor: isDragOver
-              ? alpha(theme.palette.primary.main, 0.04)
-              : 'transparent',
+            bgcolor: isDragOver ? alpha(theme.palette.primary.main, 0.04) : 'transparent',
             transition: 'all 0.2s ease',
             '&:hover': !selectedFile
               ? {
@@ -208,7 +217,12 @@ export function COIFileUpload({ onFileSelect, isUploading, uploadProgress }: COI
               <Box sx={{ textAlign: 'left', minWidth: 0 }}>
                 <Typography
                   variant="subtitle2"
-                  sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                  sx={{
+                    fontWeight: 600,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
                 >
                   {selectedFile.name}
                 </Typography>
@@ -234,14 +248,14 @@ export function COIFileUpload({ onFileSelect, isUploading, uploadProgress }: COI
         </Box>
 
         {/* Error */}
-        {error && (
+        {error ? (
           <Alert severity="error" sx={{ mt: 2 }}>
             {error}
           </Alert>
-        )}
+        ) : null}
 
         {/* Upload progress */}
-        {isUploading && (
+        {isUploading ? (
           <Box sx={{ mt: 2 }}>
             <LinearProgress
               variant={uploadProgress !== undefined ? 'determinate' : 'indeterminate'}
@@ -252,11 +266,14 @@ export function COIFileUpload({ onFileSelect, isUploading, uploadProgress }: COI
                 '& .MuiLinearProgress-bar': { bgcolor: 'primary.main' },
               }}
             />
-            <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.5, display: 'block' }}>
+            <Typography
+              variant="caption"
+              sx={{ color: 'text.secondary', mt: 0.5, display: 'block' }}
+            >
               Uploading and verifying certificate…
             </Typography>
           </Box>
-        )}
+        ) : null}
 
         {/* Submit button */}
         <Button

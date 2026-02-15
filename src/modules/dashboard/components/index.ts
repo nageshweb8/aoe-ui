@@ -1,2 +1,2 @@
-export { StatCard } from './StatCard';
 export { ChartPlaceholder } from './ChartPlaceholder';
+export { StatCard } from './StatCard';
