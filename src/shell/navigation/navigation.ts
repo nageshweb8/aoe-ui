@@ -10,6 +10,7 @@ import {
   Receipt,
   ScrollText,
   Settings,
+  Table2,
 } from 'lucide-react';
 
 export interface NavItem {
@@ -45,6 +46,10 @@ export const navigation: readonly NavSection[] = [
       { title: 'Error Checking', path: '/error-checking', icon: AlertTriangle },
       { title: 'Report Options', path: '/report-options', icon: FileBarChart },
     ],
+  },
+  {
+    label: 'Components',
+    items: [{ title: 'Data Table', path: '/ui-components', icon: Table2 }],
   },
   {
     label: 'Administration',
