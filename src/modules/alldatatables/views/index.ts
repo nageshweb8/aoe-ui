@@ -1,0 +1,1 @@
+export { AllDataTablePage } from './AllDataTable';
