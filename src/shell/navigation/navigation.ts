@@ -49,7 +49,10 @@ export const navigation: readonly NavSection[] = [
   },
   {
     label: 'Components',
-    items: [{ title: 'Data Table', path: '/ui-components', icon: Table2 }],
+    items: [
+      { title: 'Data Table', path: '/ui-components', icon: Table2 },
+      { title: 'All Data Tables', path: '/alldatatables', icon: Table2 },
+    ],
   },
   {
     label: 'Administration',
