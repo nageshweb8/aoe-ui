@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 
-import { CertificateOfInsurancePage } from '@modules/coi';
-
-export const metadata: Metadata = { title: 'COI Verification' };
+export const metadata: Metadata = { title: 'Certificate of Insurance' };
 
 export default function Page() {
-  return <CertificateOfInsurancePage />;
+  redirect('/certificate-of-insurance/dashboard');
 }

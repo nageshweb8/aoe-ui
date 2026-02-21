@@ -1,0 +1,1 @@
+export { COISettingsPage } from './COISettingsPage';

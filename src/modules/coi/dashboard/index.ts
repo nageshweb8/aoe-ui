@@ -1,0 +1,1 @@
+export { COIDashboardPage } from './COIDashboardPage';
