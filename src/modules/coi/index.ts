@@ -13,7 +13,12 @@
  */
 
 // ── Feature-slice page exports ──────────────────────────────────────
-export { BuildingListPage, RequirementTemplatesPage } from './buildings';
+export {
+  AddBuildingPage,
+  BuildingDetailPage,
+  BuildingListPage,
+  RequirementTemplatesPage,
+} from './buildings';
 export { COIDashboardPage } from './dashboard';
 export { NotificationSettingsPage } from './notifications';
 export { AuditTrailPage, ComplianceReportPage, ExpirationReportPage } from './reports';

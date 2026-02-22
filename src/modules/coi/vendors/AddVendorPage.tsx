@@ -1,7 +1,10 @@
 'use client';
 
+import { type ChangeEvent, useCallback, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
+import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -10,9 +13,30 @@ import Divider from '@mui/material/Divider';
 import Grid2 from '@mui/material/Grid2';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
 
 import { PageShell } from '@shared/components';
+
+import { addVendor } from './useVendorStore';
+import type { VendorFormValues } from './vendor.types';
+
+const INITIAL_VALUES: VendorFormValues = {
+  companyName: '',
+  street: '',
+  city: '',
+  state: '',
+  zip: '',
+  country: 'US',
+  contactName: '',
+  contactJobTitle: '',
+  contactEmail: '',
+  contactPhone: '',
+  agentName: '',
+  agentCompany: '',
+  agentEmail: '',
+  agentPhone: '',
+  buildingIds: [],
+};
 
 /**
  * Add Vendor Page — Single-screen wizard to create a vendor
@@ -20,10 +44,28 @@ import { PageShell } from '@shared/components';
  *
  * Design principle: "Fewer steps than the competitor — consolidate
  * into a single-screen wizard" (COI-UI-Enhancement-Plan §6).
- *
- * TODO: Wire form submission to vendorService.createVendor().
  */
 export function AddVendorPage() {
+  const router = useRouter();
+  const [values, setValues] = useState<VendorFormValues>(INITIAL_VALUES);
+  const [success, setSuccess] = useState(false);
+
+  const handleChange = useCallback(
+    (field: keyof VendorFormValues) => (e: ChangeEvent<HTMLInputElement>) => {
+      setValues((prev) => ({ ...prev, [field]: e.target.value }));
+    },
+    [],
+  );
+
+  const handleSubmit = useCallback(() => {
+    const vendor = addVendor(values);
+    setSuccess(true);
+    // Navigate to the new vendor's detail page after a brief delay
+    setTimeout(() => {
+      router.push(`/certificate-of-insurance/vendors/${vendor.id}`);
+    }, 600);
+  }, [values, router]);
+
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
@@ -42,6 +84,12 @@ export function AddVendorPage() {
         />
       </Box>
 
+      {success ? (
+        <Alert severity="success" sx={{ mb: 2 }}>
+          Vendor created successfully! Redirecting…
+        </Alert>
+      ) : null}
+
       <Card>
         <CardContent sx={{ p: 3 }}>
           {/* Company Information */}
@@ -50,19 +98,54 @@ export function AddVendorPage() {
           </Typography>
           <Grid2 container spacing={2}>
             <Grid2 size={{ xs: 12 }}>
-              <TextField fullWidth label="Company Name" required size="small" />
+              <TextField
+                fullWidth
+                label="Company Name"
+                required
+                size="small"
+                value={values.companyName}
+                onChange={handleChange('companyName')}
+              />
             </Grid2>
             <Grid2 size={{ xs: 12 }}>
-              <TextField fullWidth label="Street Address" required size="small" />
+              <TextField
+                fullWidth
+                label="Street Address"
+                required
+                size="small"
+                value={values.street}
+                onChange={handleChange('street')}
+              />
             </Grid2>
             <Grid2 size={{ xs: 12, sm: 4 }}>
-              <TextField fullWidth label="City" required size="small" />
+              <TextField
+                fullWidth
+                label="City"
+                required
+                size="small"
+                value={values.city}
+                onChange={handleChange('city')}
+              />
             </Grid2>
             <Grid2 size={{ xs: 12, sm: 4 }}>
-              <TextField fullWidth label="State" required size="small" />
+              <TextField
+                fullWidth
+                label="State"
+                required
+                size="small"
+                value={values.state}
+                onChange={handleChange('state')}
+              />
             </Grid2>
             <Grid2 size={{ xs: 12, sm: 4 }}>
-              <TextField fullWidth label="ZIP Code" required size="small" />
+              <TextField
+                fullWidth
+                label="ZIP Code"
+                required
+                size="small"
+                value={values.zip}
+                onChange={handleChange('zip')}
+              />
             </Grid2>
           </Grid2>
 
@@ -74,16 +157,44 @@ export function AddVendorPage() {
           </Typography>
           <Grid2 container spacing={2}>
             <Grid2 size={{ xs: 12, sm: 6 }}>
-              <TextField fullWidth label="Contact Name" required size="small" />
+              <TextField
+                fullWidth
+                label="Contact Name"
+                required
+                size="small"
+                value={values.contactName}
+                onChange={handleChange('contactName')}
+              />
             </Grid2>
             <Grid2 size={{ xs: 12, sm: 6 }}>
-              <TextField fullWidth label="Job Title" size="small" />
+              <TextField
+                fullWidth
+                label="Job Title"
+                size="small"
+                value={values.contactJobTitle}
+                onChange={handleChange('contactJobTitle')}
+              />
             </Grid2>
             <Grid2 size={{ xs: 12, sm: 6 }}>
-              <TextField fullWidth label="Email" type="email" required size="small" />
+              <TextField
+                fullWidth
+                label="Email"
+                type="email"
+                required
+                size="small"
+                value={values.contactEmail}
+                onChange={handleChange('contactEmail')}
+              />
             </Grid2>
             <Grid2 size={{ xs: 12, sm: 6 }}>
-              <TextField fullWidth label="Phone" type="tel" size="small" />
+              <TextField
+                fullWidth
+                label="Phone"
+                type="tel"
+                size="small"
+                value={values.contactPhone}
+                onChange={handleChange('contactPhone')}
+              />
             </Grid2>
           </Grid2>
 
@@ -95,16 +206,42 @@ export function AddVendorPage() {
           </Typography>
           <Grid2 container spacing={2}>
             <Grid2 size={{ xs: 12, sm: 6 }}>
-              <TextField fullWidth label="Agent Name" size="small" />
+              <TextField
+                fullWidth
+                label="Agent Name"
+                size="small"
+                value={values.agentName}
+                onChange={handleChange('agentName')}
+              />
             </Grid2>
             <Grid2 size={{ xs: 12, sm: 6 }}>
-              <TextField fullWidth label="Agent Company" size="small" />
+              <TextField
+                fullWidth
+                label="Agent Company"
+                size="small"
+                value={values.agentCompany}
+                onChange={handleChange('agentCompany')}
+              />
             </Grid2>
             <Grid2 size={{ xs: 12, sm: 6 }}>
-              <TextField fullWidth label="Agent Email" type="email" size="small" />
+              <TextField
+                fullWidth
+                label="Agent Email"
+                type="email"
+                size="small"
+                value={values.agentEmail}
+                onChange={handleChange('agentEmail')}
+              />
             </Grid2>
             <Grid2 size={{ xs: 12, sm: 6 }}>
-              <TextField fullWidth label="Agent Phone" type="tel" size="small" />
+              <TextField
+                fullWidth
+                label="Agent Phone"
+                type="tel"
+                size="small"
+                value={values.agentPhone}
+                onChange={handleChange('agentPhone')}
+              />
             </Grid2>
           </Grid2>
 
@@ -132,7 +269,12 @@ export function AddVendorPage() {
             <Button variant="outlined" component={Link} href="/certificate-of-insurance/vendors">
               Cancel
             </Button>
-            <Button variant="contained" disabled>
+            <Button
+              variant="contained"
+              startIcon={<Save size={16} />}
+              onClick={handleSubmit}
+              disabled={success}
+            >
               Save Vendor
             </Button>
           </Box>
