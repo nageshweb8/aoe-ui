@@ -26,6 +26,7 @@ export { AuditTrailPage, ComplianceReportPage, ExpirationReportPage } from './re
 export { COISettingsPage } from './settings';
 export {
   CertificateOfInsurancePage,
+  COIDocumentDetailPage,
   COITrackingListPage,
   PendingReviewPage,
   UploadCOIPage,
