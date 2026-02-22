@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { type ChangeEvent, useCallback, useMemo, useState } from 'react';
 
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -8,6 +8,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
+import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -22,7 +23,9 @@ import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
+import type { SelectChangeEvent } from '@mui/material/Select';
 import Select from '@mui/material/Select';
+import Snackbar from '@mui/material/Snackbar';
 import Switch from '@mui/material/Switch';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
@@ -31,6 +34,13 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 
 import { PageShell } from '@shared/components';
+
+import type {
+  PolicyRequirement,
+  PolicyType,
+  TemplateFormValues,
+} from '../buildings/template.types';
+import { addTemplate, updateTemplate, useTemplates } from '../buildings/useBuildingStore';
 
 /* ------------------------------------------------------------------ */
 /*  ACORD 25 limit labels — mirrors the standard form fields          */
@@ -75,6 +85,12 @@ interface LimitField {
 interface PolicySectionProps {
   readonly title: string;
   readonly limits: readonly LimitField[];
+  readonly enabled: boolean;
+  readonly required: boolean;
+  readonly limitValues: Record<string, string>;
+  readonly onToggle: (enabled: boolean) => void;
+  readonly onRequiredChange: (required: boolean) => void;
+  readonly onLimitChange: (key: string, value: string) => void;
   readonly showAdditionalInsured?: boolean;
   readonly showWaiverOfSubrogation?: boolean;
   readonly showClaimsOccur?: boolean;
@@ -88,6 +104,12 @@ interface PolicySectionProps {
 function PolicySection({
   title,
   limits,
+  enabled,
+  required: isRequired,
+  limitValues,
+  onToggle,
+  onRequiredChange,
+  onLimitChange,
   showAdditionalInsured = false,
   showWaiverOfSubrogation = false,
   showClaimsOccur = false,
@@ -98,7 +120,10 @@ function PolicySection({
   defaultExpanded = false,
 }: PolicySectionProps) {
   return (
-    <Accordion defaultExpanded={defaultExpanded} sx={{ '&:before': { display: 'none' } }}>
+    <Accordion
+      defaultExpanded={defaultExpanded}
+      sx={{ '&:before': { display: 'none' }, opacity: enabled ? 1 : 0.6 }}
+    >
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
         sx={{
@@ -109,7 +134,9 @@ function PolicySection({
         }}
       >
         <FormControlLabel
-          control={<Checkbox defaultChecked size="small" />}
+          control={
+            <Checkbox checked={enabled} size="small" onChange={(_, checked) => onToggle(checked)} />
+          }
           label=""
           onClick={(e) => e.stopPropagation()}
           sx={{ mr: 0 }}
@@ -117,7 +144,19 @@ function PolicySection({
         <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
           {title}
         </Typography>
-        <Chip label="Required" size="small" color="primary" variant="outlined" />
+        <Chip
+          label={isRequired ? 'Required' : 'Optional'}
+          size="small"
+          color={isRequired ? 'primary' : 'default'}
+          variant="outlined"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (enabled) {
+              onRequiredChange(!isRequired);
+            }
+          }}
+          sx={{ cursor: 'pointer' }}
+        />
       </AccordionSummary>
 
       <AccordionDetails sx={{ pt: 3 }}>
@@ -267,7 +306,7 @@ function PolicySection({
             </Typography>
           </Grid2>
 
-          {/* Limit fields */}
+          {/* Limit fields — controlled */}
           {limits.map((limit) => (
             <Grid2 key={limit.key} size={{ xs: 12, sm: 6, md: 4 }}>
               <TextField
@@ -275,6 +314,8 @@ function PolicySection({
                 size="small"
                 fullWidth
                 placeholder="1,000,000"
+                value={limitValues[limit.key] ?? ''}
+                onChange={(e) => onLimitChange(limit.key, e.target.value)}
                 InputProps={{
                   startAdornment: <InputAdornment position="start">$</InputAdornment>,
                 }}
@@ -286,6 +327,58 @@ function PolicySection({
     </Accordion>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/*  Policy sections state type                                        */
+/* ------------------------------------------------------------------ */
+
+interface PolicySectionState {
+  readonly enabled: boolean;
+  readonly required: boolean;
+  readonly limits: Record<string, string>;
+}
+
+type PolicySectionsMap = Record<string, PolicySectionState>;
+
+const DEFAULT_POLICY_SECTIONS: PolicySectionsMap = {
+  general_liability: {
+    enabled: true,
+    required: true,
+    limits: {
+      eachOccurrence: '1,000,000',
+      generalAggregate: '2,000,000',
+      productsCompOpAgg: '2,000,000',
+      personalAdvInjury: '1,000,000',
+    },
+  },
+  auto_liability: {
+    enabled: true,
+    required: true,
+    limits: { combinedSingleLimit: '1,000,000' },
+  },
+  umbrella: {
+    enabled: true,
+    required: true,
+    limits: { eachOccurrence: '5,000,000', aggregate: '5,000,000' },
+  },
+  workers_compensation: {
+    enabled: true,
+    required: true,
+    limits: {
+      elEachAccident: '500,000',
+      elDiseaseEaEmployee: '500,000',
+      elDiseasePolicyLimit: '500,000',
+    },
+  },
+  errors_omissions: { enabled: false, required: false, limits: {} },
+  cyber_liability: { enabled: false, required: false, limits: {} },
+};
+
+/** Default endorsement documents used by the Settings template editor */
+const SETTINGS_DEFAULT_DOCUMENTS = [
+  'Additional Insured Endorsement',
+  'Waiver of Subrogation Endorsement',
+] as const;
 
 /* ------------------------------------------------------------------ */
 /*  Main COI Settings Page                                            */
@@ -300,11 +393,185 @@ function PolicySection({
  * Tab 2: Certificate Holder — Default holder name & address.
  * Tab 3: Notifications & Email — Event-based notification settings.
  * Tab 4: AI & General — Verification thresholds and preferences.
- *
- * TODO: Wire to templateService & settingsService once API is ready.
  */
 export function COISettingsPage() {
   const [activeTab, setActiveTab] = useState(0);
+  const allTemplates = useTemplates();
+
+  // ── Tab 0 form state ────────────────────────────────────────────
+  const [editingTemplateId, setEditingTemplateId] = useState('');
+  const [templateName, setTemplateName] = useState('');
+  const [baseTemplate, setBaseTemplate] = useState('');
+  const [certHolderName, setCertHolderName] = useState('');
+  const [certHolderAddress, setCertHolderAddress] = useState('');
+  const [policySections, setPolicySections] = useState<PolicySectionsMap>(() => ({
+    ...DEFAULT_POLICY_SECTIONS,
+  }));
+  const [additionalVerbiage, setAdditionalVerbiage] = useState('');
+  const [selectedDocuments, setSelectedDocuments] = useState<string[]>([
+    ...SETTINGS_DEFAULT_DOCUMENTS,
+  ]);
+  const [additionalInsuredRequired, setAdditionalInsuredRequired] = useState(true);
+  const [waiverOfSubrogationRequired, setWaiverOfSubrogationRequired] = useState(true);
+  const [endorsementRequired, setEndorsementRequired] = useState(true);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [snackbar, setSnackbar] = useState(false);
+
+  // ── Derived ─────────────────────────────────────────────────────
+  const canSave = useMemo(() => {
+    const hasName = templateName.trim().length > 0;
+    const hasPolicy = Object.values(policySections).some((s) => s.enabled);
+    return hasName && hasPolicy;
+  }, [templateName, policySections]);
+
+  // ── Policy section handlers ─────────────────────────────────────
+  const handlePolicyToggle = useCallback((key: string, enabled: boolean) => {
+    setPolicySections((prev) => {
+      const existing = prev[key] ?? { enabled: false, required: false, limits: {} };
+      return {
+        ...prev,
+        [key]: { ...existing, enabled, required: enabled ? existing.required : false },
+      };
+    });
+  }, []);
+
+  const handlePolicyRequired = useCallback((key: string, required: boolean) => {
+    setPolicySections((prev) => {
+      const existing = prev[key] ?? { enabled: false, required: false, limits: {} };
+      return { ...prev, [key]: { ...existing, required } };
+    });
+  }, []);
+
+  const handleLimitChange = useCallback((sectionKey: string, limitKey: string, value: string) => {
+    setPolicySections((prev) => {
+      const existing = prev[sectionKey] ?? { enabled: false, required: false, limits: {} };
+      return {
+        ...prev,
+        [sectionKey]: {
+          ...existing,
+          limits: { ...existing.limits, [limitKey]: value },
+        },
+      };
+    });
+  }, []);
+
+  // ── Document handlers ───────────────────────────────────────────
+  const handleToggleDocument = useCallback((doc: string) => {
+    setSelectedDocuments((prev) =>
+      prev.includes(doc) ? prev.filter((d) => d !== doc) : [...prev, doc],
+    );
+  }, []);
+
+  // ── Load existing template ──────────────────────────────────────
+  const handleBaseTemplateChange = useCallback(
+    (e: SelectChangeEvent) => {
+      const templateId = e.target.value;
+      setBaseTemplate(templateId);
+
+      if (!templateId) {
+        setEditingTemplateId('');
+        setTemplateName('');
+        setCertHolderName('');
+        setCertHolderAddress('');
+        setAdditionalVerbiage('');
+        setPolicySections({ ...DEFAULT_POLICY_SECTIONS });
+        setSelectedDocuments([...SETTINGS_DEFAULT_DOCUMENTS]);
+        return;
+      }
+
+      const tmpl = allTemplates.find((t) => t.id === templateId);
+      if (!tmpl) {
+        return;
+      }
+
+      setEditingTemplateId(tmpl.id);
+      setTemplateName(tmpl.name);
+      setCertHolderName(tmpl.certificateHolder?.name ?? '');
+      setCertHolderAddress(tmpl.certificateHolder?.address ?? '');
+      setAdditionalVerbiage(tmpl.additionalVerbiage ?? '');
+      setAdditionalInsuredRequired(tmpl.additionalInsuredRequired);
+      setWaiverOfSubrogationRequired(tmpl.waiverOfSubrogationRequired);
+      setEndorsementRequired(tmpl.endorsementRequired);
+      setSelectedDocuments(tmpl.additionalDocuments ? [...tmpl.additionalDocuments] : []);
+
+      // Build policy sections from template requirements
+      const sections: PolicySectionsMap = {};
+      for (const key of Object.keys(DEFAULT_POLICY_SECTIONS)) {
+        const existing = tmpl.policyRequirements.find((pr) => pr.policyType === key);
+        if (existing) {
+          const cleaned: Record<string, string> = {};
+          if (existing.minimumLimits) {
+            for (const [k, v] of Object.entries(existing.minimumLimits)) {
+              // Map limit label keys to field keys for CGL/Auto/etc
+              cleaned[k] = v.replace(/^\$/, '');
+            }
+          }
+          sections[key] = { enabled: true, required: existing.required, limits: cleaned };
+        } else {
+          sections[key] = { enabled: false, required: false, limits: {} };
+        }
+      }
+      setPolicySections(sections);
+    },
+    [allTemplates],
+  );
+
+  // ── Save Template handler ──────────────────────────────────────
+  const handleSaveTemplate = useCallback(() => {
+    // Build policy requirements
+    const policyRequirements: PolicyRequirement[] = [];
+    for (const [type, section] of Object.entries(policySections)) {
+      if (!section.enabled) {
+        continue;
+      }
+      const minimumLimits: Record<string, string> = {};
+      for (const [k, v] of Object.entries(section.limits)) {
+        if (v.trim()) {
+          minimumLimits[k] = `$${v.replace(/^\$/, '')}`;
+        }
+      }
+      policyRequirements.push({
+        policyType: type as PolicyType,
+        required: section.required,
+        minimumLimits: Object.keys(minimumLimits).length > 0 ? minimumLimits : undefined,
+      });
+    }
+
+    const formValues: TemplateFormValues = {
+      name: templateName.trim(),
+      description: '',
+      isDefault: false,
+      policyRequirements,
+      additionalInsuredRequired,
+      waiverOfSubrogationRequired,
+      endorsementRequired,
+      additionalVerbiage: additionalVerbiage.trim(),
+      certificateHolderName: certHolderName.trim(),
+      certificateHolderAddress: certHolderAddress.trim(),
+      additionalDocuments: selectedDocuments,
+    };
+
+    if (editingTemplateId) {
+      updateTemplate(editingTemplateId, formValues);
+    } else {
+      addTemplate(formValues);
+    }
+
+    setSaveSuccess(true);
+    setSnackbar(true);
+    setTimeout(() => setSaveSuccess(false), 3000);
+  }, [
+    templateName,
+    policySections,
+    additionalInsuredRequired,
+    waiverOfSubrogationRequired,
+    endorsementRequired,
+    additionalVerbiage,
+    certHolderName,
+    certHolderAddress,
+    selectedDocuments,
+    editingTemplateId,
+  ]);
 
   return (
     <Box>
@@ -329,6 +596,12 @@ export function COISettingsPage() {
       {/* ── Tab 0: Requirement Template ────────────────────────── */}
       {activeTab === 0 && (
         <Box>
+          {saveSuccess ? (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              Template {editingTemplateId ? 'updated' : 'saved'} successfully!
+            </Alert>
+          ) : null}
+
           {/* Template selector */}
           <Card sx={{ mb: 3 }}>
             <CardContent sx={{ p: 2 }}>
@@ -339,16 +612,27 @@ export function COISettingsPage() {
                     size="small"
                     fullWidth
                     placeholder="Default Requirements"
+                    value={templateName}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setTemplateName(e.target.value)}
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 5 }}>
                   <FormControl size="small" fullWidth>
-                    <InputLabel>Base Template</InputLabel>
-                    <Select label="Base Template" value="" displayEmpty>
+                    <InputLabel>Load Existing Template</InputLabel>
+                    <Select
+                      label="Load Existing Template"
+                      value={baseTemplate}
+                      onChange={handleBaseTemplateChange}
+                    >
                       <MenuItem value="">
-                        <em>Corporate USA Best Practice — Default Template</em>
+                        <em>New Template</em>
                       </MenuItem>
-                      <MenuItem value="custom">Custom Template</MenuItem>
+                      {allTemplates.map((t) => (
+                        <MenuItem key={t.id} value={t.id}>
+                          {t.name}
+                          {t.isDefault ? ' (Default)' : ''}
+                        </MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
                 </Grid2>
@@ -384,6 +668,10 @@ export function COISettingsPage() {
                     size="small"
                     fullWidth
                     placeholder="QSource Group Inc"
+                    value={certHolderName}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      setCertHolderName(e.target.value)
+                    }
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6 }}>
@@ -392,6 +680,10 @@ export function COISettingsPage() {
                     size="small"
                     fullWidth
                     placeholder="14150 Huffmeister Road, Suite 200, Cypress, TX 77429"
+                    value={certHolderAddress}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      setCertHolderAddress(e.target.value)
+                    }
                   />
                 </Grid2>
               </Grid2>
@@ -403,6 +695,12 @@ export function COISettingsPage() {
             <PolicySection
               title="Commercial General Liability"
               limits={CGL_LIMITS}
+              enabled={policySections['general_liability']?.enabled ?? false}
+              required={policySections['general_liability']?.required ?? false}
+              limitValues={policySections['general_liability']?.limits ?? {}}
+              onToggle={(v) => handlePolicyToggle('general_liability', v)}
+              onRequiredChange={(v) => handlePolicyRequired('general_liability', v)}
+              onLimitChange={(k, v) => handleLimitChange('general_liability', k, v)}
               showAdditionalInsured
               showWaiverOfSubrogation
               showClaimsOccur
@@ -412,6 +710,12 @@ export function COISettingsPage() {
             <PolicySection
               title="Automobile Liability"
               limits={AUTO_LIMITS}
+              enabled={policySections['auto_liability']?.enabled ?? false}
+              required={policySections['auto_liability']?.required ?? false}
+              limitValues={policySections['auto_liability']?.limits ?? {}}
+              onToggle={(v) => handlePolicyToggle('auto_liability', v)}
+              onRequiredChange={(v) => handlePolicyRequired('auto_liability', v)}
+              onLimitChange={(k, v) => handleLimitChange('auto_liability', k, v)}
               showAdditionalInsured
               showWaiverOfSubrogation
               showAutoTypes
@@ -420,6 +724,12 @@ export function COISettingsPage() {
             <PolicySection
               title="Umbrella / Excess Liability"
               limits={UMBRELLA_LIMITS}
+              enabled={policySections['umbrella']?.enabled ?? false}
+              required={policySections['umbrella']?.required ?? false}
+              limitValues={policySections['umbrella']?.limits ?? {}}
+              onToggle={(v) => handlePolicyToggle('umbrella', v)}
+              onRequiredChange={(v) => handlePolicyRequired('umbrella', v)}
+              onLimitChange={(k, v) => handleLimitChange('umbrella', k, v)}
               showUmbrellaType
               showDeductible
             />
@@ -427,86 +737,43 @@ export function COISettingsPage() {
             <PolicySection
               title="Workers' Compensation and Employers' Liability"
               limits={WC_LIMITS}
+              enabled={policySections['workers_compensation']?.enabled ?? false}
+              required={policySections['workers_compensation']?.required ?? false}
+              limitValues={policySections['workers_compensation']?.limits ?? {}}
+              onToggle={(v) => handlePolicyToggle('workers_compensation', v)}
+              onRequiredChange={(v) => handlePolicyRequired('workers_compensation', v)}
+              onLimitChange={(k, v) => handleLimitChange('workers_compensation', k, v)}
               showPerStatute
               showWaiverOfSubrogation
             />
 
             {/* Additional / custom policy types */}
-            <Accordion sx={{ '&:before': { display: 'none' } }}>
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                sx={{
-                  bgcolor: 'action.hover',
-                  borderBottom: '1px solid',
-                  borderColor: 'divider',
-                  '& .MuiAccordionSummary-content': { alignItems: 'center', gap: 2 },
-                }}
-              >
-                <FormControlLabel
-                  control={<Checkbox size="small" />}
-                  label=""
-                  onClick={(e) => e.stopPropagation()}
-                  sx={{ mr: 0 }}
-                />
-                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                  E&O / Cyber / Media Liability
-                </Typography>
-                <Chip label="Optional" size="small" variant="outlined" />
-              </AccordionSummary>
-              <AccordionDetails sx={{ pt: 3 }}>
-                <Grid2 container spacing={2}>
-                  <Grid2 size={{ xs: 12, sm: 6 }}>
-                    <TextField
-                      label="Each Occurrence / Aggregate"
-                      size="small"
-                      fullWidth
-                      placeholder="5,000,000"
-                      InputProps={{
-                        startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                      }}
-                    />
-                  </Grid2>
-                </Grid2>
-              </AccordionDetails>
-            </Accordion>
+            <PolicySection
+              title="E&O / Cyber / Media Liability"
+              limits={[
+                {
+                  key: 'eachOccurrenceAggregate',
+                  label: 'Each Occurrence / Aggregate',
+                },
+              ]}
+              enabled={policySections['errors_omissions']?.enabled ?? false}
+              required={policySections['errors_omissions']?.required ?? false}
+              limitValues={policySections['errors_omissions']?.limits ?? {}}
+              onToggle={(v) => handlePolicyToggle('errors_omissions', v)}
+              onRequiredChange={(v) => handlePolicyRequired('errors_omissions', v)}
+              onLimitChange={(k, v) => handleLimitChange('errors_omissions', k, v)}
+            />
 
-            <Accordion sx={{ '&:before': { display: 'none' } }}>
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                sx={{
-                  bgcolor: 'action.hover',
-                  borderBottom: '1px solid',
-                  borderColor: 'divider',
-                  '& .MuiAccordionSummary-content': { alignItems: 'center', gap: 2 },
-                }}
-              >
-                <FormControlLabel
-                  control={<Checkbox size="small" />}
-                  label=""
-                  onClick={(e) => e.stopPropagation()}
-                  sx={{ mr: 0 }}
-                />
-                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                  3rd Party Crime
-                </Typography>
-                <Chip label="Optional" size="small" variant="outlined" />
-              </AccordionSummary>
-              <AccordionDetails sx={{ pt: 3 }}>
-                <Grid2 container spacing={2}>
-                  <Grid2 size={{ xs: 12, sm: 6 }}>
-                    <TextField
-                      label="Limit"
-                      size="small"
-                      fullWidth
-                      placeholder="5,000,000"
-                      InputProps={{
-                        startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                      }}
-                    />
-                  </Grid2>
-                </Grid2>
-              </AccordionDetails>
-            </Accordion>
+            <PolicySection
+              title="3rd Party Crime"
+              limits={[{ key: 'limit', label: 'Limit' }]}
+              enabled={policySections['cyber_liability']?.enabled ?? false}
+              required={policySections['cyber_liability']?.required ?? false}
+              limitValues={policySections['cyber_liability']?.limits ?? {}}
+              onToggle={(v) => handlePolicyToggle('cyber_liability', v)}
+              onRequiredChange={(v) => handlePolicyRequired('cyber_liability', v)}
+              onLimitChange={(k, v) => handleLimitChange('cyber_liability', k, v)}
+            />
           </Box>
 
           {/* Description of Operations */}
@@ -524,6 +791,10 @@ export function COISettingsPage() {
                 multiline
                 rows={3}
                 placeholder="Certificate holder is added as an additional insured."
+                value={additionalVerbiage}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setAdditionalVerbiage(e.target.value)
+                }
               />
             </CardContent>
           </Card>
@@ -566,10 +837,19 @@ export function COISettingsPage() {
                     }}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Checkbox size="small" defaultChecked />
+                      <Checkbox
+                        size="small"
+                        checked={selectedDocuments.includes(doc)}
+                        onChange={() => handleToggleDocument(doc)}
+                      />
                       <Typography variant="body2">{doc}</Typography>
                     </Box>
-                    <IconButton size="small" color="error">
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => setSelectedDocuments((prev) => prev.filter((d) => d !== doc))}
+                      disabled={!selectedDocuments.includes(doc)}
+                    >
                       <DeleteOutlineIcon fontSize="small" />
                     </IconButton>
                   </Box>
@@ -579,9 +859,32 @@ export function COISettingsPage() {
           </Card>
 
           <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-            <Button variant="outlined">Cancel</Button>
-            <Button variant="contained">Save Template</Button>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setTemplateName('');
+                setBaseTemplate('');
+                setEditingTemplateId('');
+                setCertHolderName('');
+                setCertHolderAddress('');
+                setAdditionalVerbiage('');
+                setPolicySections({ ...DEFAULT_POLICY_SECTIONS });
+                setSelectedDocuments([...SETTINGS_DEFAULT_DOCUMENTS]);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button variant="contained" onClick={handleSaveTemplate} disabled={!canSave}>
+              {editingTemplateId ? 'Update Template' : 'Save Template'}
+            </Button>
           </Box>
+
+          <Snackbar
+            open={snackbar}
+            autoHideDuration={3000}
+            onClose={() => setSnackbar(false)}
+            message={`Template ${editingTemplateId ? 'updated' : 'saved'} successfully`}
+          />
         </Box>
       )}
 

@@ -52,6 +52,15 @@ export const MOCK_TEMPLATES: COITemplate[] = [
     endorsementRequired: true,
     additionalVerbiage:
       'Certificate Holder must be listed as Additional Insured on the General Liability and Umbrella policies.',
+    certificateHolder: {
+      name: 'AOE Property Management LLC',
+      address: '600 N. Broad Street, Suite 200, Philadelphia, PA 19130',
+    },
+    additionalDocuments: [
+      'Additional Insured Endorsement',
+      'Waiver of Subrogation Endorsement',
+      'Primary & Non-Contributory Endorsement',
+    ],
     buildingIds: ['b-001', 'b-002', 'b-004', 'b-007'],
     createdAt: '2024-08-01T10:00:00Z',
     updatedAt: '2026-01-15T14:00:00Z',
@@ -118,6 +127,17 @@ export const MOCK_TEMPLATES: COITemplate[] = [
     endorsementRequired: true,
     additionalVerbiage:
       'All policies must name the Certificate Holder as Additional Insured. 30-day advance notice of cancellation required.',
+    certificateHolder: {
+      name: 'AOE Industrial Holdings LLC',
+      address: '1200 Market Street, Suite 500, Philadelphia, PA 19107',
+    },
+    additionalDocuments: [
+      'Additional Insured Endorsement',
+      'Waiver of Subrogation Endorsement',
+      'Primary & Non-Contributory Endorsement',
+      '30-Day Notice of Cancellation',
+      'Per Project Aggregate Endorsement',
+    ],
     buildingIds: ['b-003', 'b-005'],
     createdAt: '2025-01-10T09:00:00Z',
     updatedAt: '2026-02-01T11:30:00Z',

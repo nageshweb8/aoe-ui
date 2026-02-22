@@ -64,7 +64,13 @@ export function RequirementTemplatesPage() {
           title="Requirement Templates"
           description="Define reusable COI policy requirements for your buildings"
         />
-        <Button variant="contained" size="small" startIcon={<Plus size={18} />} disabled>
+        <Button
+          variant="contained"
+          size="small"
+          startIcon={<Plus size={18} />}
+          component={Link}
+          href="/certificate-of-insurance/buildings/templates/create"
+        >
           Create Template
         </Button>
       </Box>
@@ -96,7 +102,12 @@ export function RequirementTemplatesPage() {
               title="No Templates"
               description="Create a requirement template to define the insurance policies vendors must provide."
               action={
-                <Button variant="contained" size="small" disabled>
+                <Button
+                  variant="contained"
+                  size="small"
+                  component={Link}
+                  href="/certificate-of-insurance/buildings/templates/create"
+                >
                   Create Template
                 </Button>
               }

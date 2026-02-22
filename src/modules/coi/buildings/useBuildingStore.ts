@@ -163,6 +163,12 @@ export function addTemplate(values: TemplateFormValues): COITemplate {
     description: values.description || undefined,
     isDefault: values.isDefault,
     policyRequirements: values.policyRequirements,
+    certificateHolder:
+      values.certificateHolderName || values.certificateHolderAddress
+        ? { name: values.certificateHolderName, address: values.certificateHolderAddress }
+        : undefined,
+    additionalDocuments:
+      values.additionalDocuments.length > 0 ? values.additionalDocuments : undefined,
     additionalInsuredRequired: values.additionalInsuredRequired,
     waiverOfSubrogationRequired: values.waiverOfSubrogationRequired,
     endorsementRequired: values.endorsementRequired,
@@ -175,6 +181,49 @@ export function addTemplate(values: TemplateFormValues): COITemplate {
   templates = [newTemplate, ...templates];
   emitTemplateChange();
   return newTemplate;
+}
+
+/** Update an existing template. Returns updated template or undefined. */
+export function updateTemplate(
+  id: string,
+  values: Partial<TemplateFormValues>,
+): COITemplate | undefined {
+  const idx = templates.findIndex((t) => t.id === id);
+  if (idx === -1) {
+    return undefined;
+  }
+
+  const existing = templates[idx];
+  if (!existing) {
+    return undefined;
+  }
+
+  const updated: COITemplate = {
+    ...existing,
+    name: values.name ?? existing.name,
+    description: values.description ?? existing.description,
+    isDefault: values.isDefault ?? existing.isDefault,
+    policyRequirements: values.policyRequirements ?? existing.policyRequirements,
+    additionalInsuredRequired:
+      values.additionalInsuredRequired ?? existing.additionalInsuredRequired,
+    waiverOfSubrogationRequired:
+      values.waiverOfSubrogationRequired ?? existing.waiverOfSubrogationRequired,
+    endorsementRequired: values.endorsementRequired ?? existing.endorsementRequired,
+    additionalVerbiage: values.additionalVerbiage ?? existing.additionalVerbiage,
+    certificateHolder:
+      values.certificateHolderName !== undefined || values.certificateHolderAddress !== undefined
+        ? {
+            name: values.certificateHolderName ?? existing.certificateHolder?.name ?? '',
+            address: values.certificateHolderAddress ?? existing.certificateHolder?.address ?? '',
+          }
+        : existing.certificateHolder,
+    additionalDocuments: values.additionalDocuments ?? existing.additionalDocuments,
+    updatedAt: new Date().toISOString(),
+  };
+
+  templates = templates.map((t, i) => (i === idx ? updated : t));
+  emitTemplateChange();
+  return updated;
 }
 
 /** Delete a template by ID. */

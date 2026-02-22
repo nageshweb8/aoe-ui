@@ -17,6 +17,7 @@ export {
   AddBuildingPage,
   BuildingDetailPage,
   BuildingListPage,
+  CreateTemplatePage,
   RequirementTemplatesPage,
 } from './buildings';
 export { COIDashboardPage } from './dashboard';

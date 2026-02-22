@@ -54,6 +54,8 @@ export interface COITemplate {
     readonly name: string;
     readonly address: string;
   };
+  /** Additional required documents / endorsements */
+  readonly additionalDocuments?: readonly string[];
   readonly buildingIds: readonly string[];
   readonly createdAt: string;
   readonly updatedAt: string;
@@ -69,4 +71,22 @@ export interface TemplateFormValues {
   waiverOfSubrogationRequired: boolean;
   endorsementRequired: boolean;
   additionalVerbiage: string;
+  certificateHolderName: string;
+  certificateHolderAddress: string;
+  additionalDocuments: string[];
 }
+
+/** Empty template form — used by Create Template page */
+export const EMPTY_TEMPLATE_FORM: TemplateFormValues = {
+  name: '',
+  description: '',
+  isDefault: false,
+  policyRequirements: [],
+  additionalInsuredRequired: false,
+  waiverOfSubrogationRequired: false,
+  endorsementRequired: false,
+  additionalVerbiage: '',
+  certificateHolderName: '',
+  certificateHolderAddress: '',
+  additionalDocuments: [],
+};
