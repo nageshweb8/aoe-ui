@@ -5,10 +5,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import Alert from '@mui/material/Alert';
+import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
+import Checkbox from '@mui/material/Checkbox';
+import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import Grid2 from '@mui/material/Grid2';
 import TextField from '@mui/material/TextField';
@@ -16,6 +19,8 @@ import Typography from '@mui/material/Typography';
 import { ArrowLeft, Save } from 'lucide-react';
 
 import { PageShell } from '@shared/components';
+
+import { useBuildings } from '../buildings/useBuildingStore';
 
 import { addVendor } from './useVendorStore';
 import type { VendorFormValues } from './vendor.types';
@@ -49,6 +54,9 @@ export function AddVendorPage() {
   const router = useRouter();
   const [values, setValues] = useState<VendorFormValues>(INITIAL_VALUES);
   const [success, setSuccess] = useState(false);
+  const buildings = useBuildings();
+
+  const selectedBuildings = buildings.filter((b) => values.buildingIds.includes(b.id));
 
   const handleChange = useCallback(
     (field: keyof VendorFormValues) => (e: ChangeEvent<HTMLInputElement>) => {
@@ -251,18 +259,49 @@ export function AddVendorPage() {
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
             Building Assignment
           </Typography>
-          <Box
-            sx={{
-              p: 3,
-              borderRadius: 2,
-              border: '2px dashed',
-              borderColor: 'divider',
-              textAlign: 'center',
-              color: 'text.secondary',
+          <Autocomplete
+            multiple
+            options={buildings}
+            getOptionLabel={(b) => b.name}
+            value={selectedBuildings}
+            onChange={(_, newValue) => {
+              setValues((prev) => ({ ...prev, buildingIds: newValue.map((b) => b.id) }));
             }}
-          >
-            Multi-select building assignment — Coming Soon
-          </Box>
+            disableCloseOnSelect
+            renderOption={(props, option, { selected }) => (
+              <li {...props} key={option.id}>
+                <Checkbox size="small" checked={selected} sx={{ mr: 1 }} />
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    {option.name}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                    {option.address.street}, {option.address.city}, {option.address.state}{' '}
+                    {option.address.zip}
+                  </Typography>
+                </Box>
+              </li>
+            )}
+            renderTags={(tagValue, getTagProps) =>
+              tagValue.map((option, index) => (
+                <Chip
+                  {...getTagProps({ index })}
+                  key={option.id}
+                  label={option.name}
+                  size="small"
+                />
+              ))
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Assigned Buildings"
+                placeholder={selectedBuildings.length === 0 ? 'Search buildings…' : ''}
+                size="small"
+              />
+            )}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+          />
 
           {/* Actions */}
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 4 }}>

@@ -1,3 +1,6 @@
+import type { COITemplate } from '../buildings/template.types';
+import type { PolicyType } from '../buildings/template.types';
+import { POLICY_TYPE_LABELS } from '../buildings/template.types';
 import type { COIVerificationResponse } from '../shared/types/coi.types';
 import type { ComplianceLineItem } from '../shared/types/document.types';
 
@@ -134,6 +137,191 @@ const MOCK_PARTIAL_RESPONSE: COIVerificationResponse = {
     },
   ],
 };
+
+// ── Template-aware compliance comparison ────────────────────────────
+
+/** Keywords for matching extracted policy names to template policy types. */
+const POLICY_KEYWORDS: Record<PolicyType, readonly string[]> = {
+  general_liability: ['general', 'cgl'],
+  auto_liability: ['auto', 'automobile'],
+  workers_compensation: ['worker', 'comp'],
+  umbrella: ['umbrella', 'excess'],
+  professional_liability: ['professional'],
+  errors_omissions: ['errors', 'omissions', 'e&o'],
+  property: ['property'],
+  cyber_liability: ['cyber'],
+};
+
+function matchesPolicyType(typeOfInsurance: string, policyType: PolicyType): boolean {
+  const insurance = typeOfInsurance.toLowerCase();
+  const keywords = POLICY_KEYWORDS[policyType];
+  return keywords.some((kw) => insurance.includes(kw));
+}
+
+/** Normalize a limit name for fuzzy comparison. */
+function normalizeLimitName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** Find a matching limit value from extracted limits by fuzzy name match. */
+function findMatchingLimit(
+  limits: Record<string, string> | undefined,
+  limitName: string,
+): string | undefined {
+  if (!limits) {
+    return undefined;
+  }
+  // Exact match first
+  if (limits[limitName] !== undefined) {
+    return limits[limitName];
+  }
+  // Fuzzy match — compare normalized names and check significant word overlap
+  const normalizedTarget = normalizeLimitName(limitName);
+  const targetWords = normalizedTarget.split(' ').filter((w) => w.length > 2);
+
+  for (const [key, value] of Object.entries(limits)) {
+    const normalizedKey = normalizeLimitName(key);
+    if (normalizedKey === normalizedTarget) {
+      return value;
+    }
+    // Check if significant words overlap
+    const keyWords = normalizedKey.split(' ').filter((w) => w.length > 2);
+    const matchingWords = targetWords.filter((tw) =>
+      keyWords.some((kw) => kw.includes(tw) || tw.includes(kw)),
+    );
+    if (matchingWords.length >= Math.max(1, Math.ceil(targetWords.length * 0.5))) {
+      return value;
+    }
+  }
+  return undefined;
+}
+
+/** Parse a dollar amount string like "$1,000,000" to a number. */
+function parseDollarAmount(value: string): number | null {
+  const cleaned = value.replace(/[$,\s]/g, '');
+  const match = cleaned.match(/^(\d+)$/);
+  if (match?.[1]) {
+    return parseInt(match[1], 10);
+  }
+  return null;
+}
+
+/** Compare extracted limit against minimum required limit. */
+function meetsLimit(actual: string, expected: string): boolean {
+  const actualNum = parseDollarAmount(actual);
+  const expectedNum = parseDollarAmount(expected);
+  if (actualNum !== null && expectedNum !== null) {
+    return actualNum >= expectedNum;
+  }
+  // Non-numeric comparison (e.g., "Full Value")
+  return actual.toLowerCase().trim() === expected.toLowerCase().trim();
+}
+
+/**
+ * Generate compliance results by comparing a verification response
+ * against a building's requirement template.
+ */
+export function generateTemplateComplianceResults(
+  verification: COIVerificationResponse,
+  template: COITemplate,
+): ComplianceLineItem[] {
+  const results: ComplianceLineItem[] = [];
+
+  // Compare each policy requirement in the template
+  for (const req of template.policyRequirements) {
+    if (!req.required) {
+      continue;
+    }
+
+    const policyLabel = POLICY_TYPE_LABELS[req.policyType];
+
+    // Find corresponding extracted policy
+    const extracted = verification.policies.find((p) =>
+      matchesPolicyType(p.typeOfInsurance, req.policyType),
+    );
+
+    if (!extracted) {
+      // Policy not found in certificate
+      if (req.minimumLimits) {
+        for (const [limitName, expected] of Object.entries(req.minimumLimits)) {
+          results.push({
+            requirement: `${policyLabel} — ${limitName}`,
+            expected,
+            actual: 'Not Found',
+            passed: false,
+            confidence: 0.85,
+          });
+        }
+      } else {
+        results.push({
+          requirement: policyLabel,
+          expected: 'Required',
+          actual: 'Not Found',
+          passed: false,
+          confidence: 0.85,
+        });
+      }
+      continue;
+    }
+
+    // Compare each minimum limit
+    if (req.minimumLimits) {
+      for (const [limitName, expected] of Object.entries(req.minimumLimits)) {
+        const actual = findMatchingLimit(extracted.limits, limitName) ?? 'Not Found';
+        const passed = actual !== 'Not Found' && meetsLimit(actual, expected);
+        results.push({
+          requirement: `${policyLabel} — ${limitName}`,
+          expected,
+          actual,
+          passed,
+          confidence: passed ? 0.96 : 0.92,
+        });
+      }
+    }
+  }
+
+  // Certificate holder match
+  if (template.certificateHolder) {
+    const extractedName = verification.certificateHolder?.name?.toLowerCase().trim() ?? '';
+    const templateName = template.certificateHolder.name.toLowerCase().trim();
+    const nameMatch = extractedName === templateName;
+    results.push({
+      requirement: 'Certificate Holder Name',
+      expected: template.certificateHolder.name,
+      actual: verification.certificateHolder?.name ?? 'Not Found',
+      passed: nameMatch,
+      confidence: 0.98,
+    });
+  }
+
+  // Additional Insured endorsement
+  if (template.additionalInsuredRequired) {
+    results.push({
+      requirement: 'Additional Insured Endorsement',
+      expected: 'Required',
+      actual: verification.status === 'verified' ? 'Present' : 'Missing',
+      passed: verification.status === 'verified',
+      confidence: 0.91,
+    });
+  }
+
+  // Waiver of Subrogation
+  if (template.waiverOfSubrogationRequired) {
+    results.push({
+      requirement: 'Waiver of Subrogation',
+      expected: 'Required',
+      actual: 'Present',
+      passed: true,
+      confidence: 0.9,
+    });
+  }
+
+  return results;
+}
 
 // ── Compliance generation ──────────────────────────────────────────
 

@@ -23,6 +23,12 @@ import { ArrowLeft, Building2, Mail, MapPin, Phone, ShieldCheck, User } from 'lu
 import { PageShell } from '@shared/components';
 
 import { StatusBadge } from '../shared/components';
+import {
+  getCompliancePercentage,
+  getStatusLabel,
+  getStatusVariant,
+  useCOIDocuments,
+} from '../tracking/useCOITrackingStore';
 
 import { useVendor } from './useVendorStore';
 import type { VendorStatus } from './vendor.types';
@@ -90,6 +96,8 @@ function DetailRow({ icon, label, value }: DetailRowProps) {
 export function VendorDetailPage() {
   const { id } = useParams<{ id: string }>();
   const vendor = useVendor(id);
+  const allDocuments = useCOIDocuments();
+  const vendorDocuments = allDocuments.filter((d) => d.vendorId === id);
 
   if (!vendor) {
     return (
@@ -313,36 +321,96 @@ export function VendorDetailPage() {
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1 }}>
                   <Chip
-                    label={`${vendor.coiCount} certificate${vendor.coiCount === 1 ? '' : 's'}`}
+                    label={`${vendorDocuments.length} certificate${vendorDocuments.length === 1 ? '' : 's'}`}
                     size="small"
                     variant="outlined"
                   />
                   <Button variant="outlined" size="small">
                     Request COI
                   </Button>
-                  <Button variant="contained" size="small">
+                  <Button
+                    component={Link}
+                    href="/certificate-of-insurance/tracking/upload"
+                    variant="contained"
+                    size="small"
+                  >
                     Upload COI
                   </Button>
                 </Box>
               </Box>
               <Divider sx={{ mb: 2 }} />
-              {vendor.coiCount > 0 ? (
-                <Box
-                  sx={{
-                    p: 3,
-                    borderRadius: 2,
-                    border: '2px dashed',
-                    borderColor: 'divider',
-                    textAlign: 'center',
-                    color: 'text.secondary',
-                    minHeight: 100,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  COI document list will appear here once document tracking is implemented
-                </Box>
+              {vendorDocuments.length > 0 ? (
+                <TableContainer>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 700 }}>Building</TableCell>
+                        <TableCell sx={{ fontWeight: 700 }}>File</TableCell>
+                        <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
+                        <TableCell sx={{ fontWeight: 700 }}>Compliance</TableCell>
+                        <TableCell sx={{ fontWeight: 700 }}>Expiration</TableCell>
+                        <TableCell sx={{ fontWeight: 700 }}>Uploaded</TableCell>
+                        <TableCell />
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {vendorDocuments.map((doc) => {
+                        const pct = getCompliancePercentage(doc);
+                        return (
+                          <TableRow key={doc.id} hover>
+                            <TableCell>
+                              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                {doc.buildingName}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Typography
+                                variant="body2"
+                                sx={{ fontFamily: 'monospace', fontSize: '0.8125rem' }}
+                              >
+                                {doc.fileName ?? '—'}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <StatusBadge
+                                label={getStatusLabel(doc.status)}
+                                variant={getStatusVariant(doc.status)}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={`${pct}%`}
+                                size="small"
+                                color={complianceColor(pct)}
+                                sx={{ fontWeight: 600, minWidth: 48 }}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2">
+                                {doc.earliestExpiration ? formatDate(doc.earliestExpiration) : '—'}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2">
+                                {doc.uploadedAt ? formatDate(doc.uploadedAt) : '—'}
+                              </Typography>
+                            </TableCell>
+                            <TableCell align="right">
+                              <Button
+                                component={Link}
+                                href={`/certificate-of-insurance/tracking/${doc.id}`}
+                                size="small"
+                                variant="text"
+                              >
+                                View
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               ) : (
                 <Box
                   sx={{
