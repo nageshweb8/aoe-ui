@@ -22,8 +22,6 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { visuallyHidden } from '@mui/utils';
 
-/* ================= TYPES ================= */
-
 interface Data {
   id: number;
   name: string;
@@ -41,8 +39,6 @@ interface HeadCell {
   numeric: boolean;
   disablePadding: boolean;
 }
-
-/* ================= DATA ================= */
 
 function createData(
   id: number,
@@ -190,7 +186,13 @@ export default function SortingTable() {
         <TableContainer>
           <Table size={dense ? 'small' : 'medium'}>
             <TableHead>
-              <TableRow>
+              <TableRow
+                sx={{
+                  backgroundColor: 'orange',
+                  color: 'white',
+                  fontWeight: 'bold',
+                }}
+              >
                 <TableCell padding="checkbox">
                   <Checkbox
                     indeterminate={selected.length > 0 && selected.length < rows.length}
@@ -218,7 +220,15 @@ export default function SortingTable() {
               </TableRow>
             </TableHead>
 
-            <TableBody>
+            <TableBody
+              sx={{
+                '& .MuiTableRow-root:hover': {
+                  backgroundColor: 'blue',
+                  color: 'white',
+                  cursor: 'pointer',
+                },
+              }}
+            >
               {visibleRows.map((row) => {
                 const isSelected = selected.includes(row.id);
 

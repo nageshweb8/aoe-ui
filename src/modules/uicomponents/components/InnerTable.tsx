@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 
 import {
   Autocomplete,
+  Box,
+  Checkbox,
   Paper,
   Table,
   TableBody,
@@ -11,11 +13,9 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  TableSortLabel,
   TextField,
-  Typography,
 } from '@mui/material';
-
-/* Types */
 
 interface RowData {
   id: number;
@@ -25,43 +25,22 @@ interface RowData {
   contact: string;
 }
 
-interface Filters {
-  id: string;
-  name: string;
-  age: string;
-  location: string;
-  contact: string;
-}
+type FilterType = {
+  [key in keyof RowData]: string;
+};
 
-/* Data Create Function */
-
-function createData(
-  id: number,
-  name: string,
-  age: number,
-  location: string,
-  contact: string,
-): RowData {
-  return { id, name, age, location, contact };
-}
-
-/* Sample Data */
-
-const rows: RowData[] = [
-  createData(1, 'Ravi', 25, 'Hyderabad', '9000000001'),
-  createData(2, 'Sita', 28, 'Bangalore', '9000000002'),
-  createData(3, 'Kiran', 22, 'Chennai', '9000000003'),
-  createData(4, 'Anjali', 30, 'Mumbai', '9000000004'),
-  createData(5, 'Rahul', 27, 'Delhi', '9000000005'),
-  createData(6, 'Priya', 24, 'Pune', '9000000006'),
+const initialData: RowData[] = [
+  { id: 1, name: 'Ravi', age: 25, location: 'Hyderabad', contact: '9876543210' },
+  { id: 2, name: 'Sita', age: 28, location: 'Vijayawada', contact: '9123456780' },
+  { id: 3, name: 'Kiran', age: 30, location: 'Chennai', contact: '9012345678' },
+  { id: 4, name: 'Anjali', age: 22, location: 'Bangalore', contact: '9988776655' },
 ];
 
-/* Get Unique Locations for Dropdown */
+export default function FilterTable() {
+  const [data] = useState<RowData[]>(initialData);
+  const [selected, setSelected] = useState<number[]>([]);
 
-const uniqueLocations = Array.from(new Set(rows.map((r) => r.location)));
-
-export default function CollapsibleTable() {
-  const [filters, setFilters] = useState<Filters>({
+  const [filters, setFilters] = useState<FilterType>({
     id: '',
     name: '',
     age: '',
@@ -69,134 +48,173 @@ export default function CollapsibleTable() {
     contact: '',
   });
 
+  const [orderBy, setOrderBy] = useState<keyof RowData>('id');
+  const [order, setOrder] = useState<'asc' | 'desc'>('asc');
+
   const [page, setPage] = useState<number>(0);
-  const rowsPerPage = 8;
+  const [rowsPerPage, setRowsPerPage] = useState<number>(2);
 
-  /* Filtering */
+  const locationOptions = [...new Set(data.map((row) => row.location))];
 
-  const filteredData = rows.filter((row) =>
-    (Object.keys(filters) as (keyof Filters)[]).every((key) =>
-      String(row[key]).toLowerCase().includes(filters[key].toLowerCase()),
-    ),
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const handleFilterChange = (field: keyof RowData, value: string) => {
+    setFilters({ ...filters, [field]: value });
+    setPage(0);
+  };
+
+  const handleCheckboxChange = (id: number) => {
+    setSelected((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
+  };
+
+  const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.checked) {
+      const allIds = paginatedData.map((row) => row.id);
+      setSelected(allIds);
+    } else {
+      setSelected([]);
+    }
+  };
+
+  const handleSort = (property: keyof RowData) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
+  const filteredData = data.filter(
+    (row) =>
+      row.id.toString().includes(filters.id) &&
+      row.name.toLowerCase().includes(filters.name.toLowerCase()) &&
+      row.age.toString().includes(filters.age) &&
+      row.location.toLowerCase().includes(filters.location.toLowerCase()) &&
+      row.contact.includes(filters.contact),
   );
 
-  const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  const sortedData = [...filteredData].sort((a, b) => {
+    const valueA = a[orderBy];
+    const valueB = b[orderBy];
+
+    if (typeof valueA === 'number' && typeof valueB === 'number') {
+      return order === 'asc' ? valueA - valueB : valueB - valueA;
+    } else {
+      return order === 'asc'
+        ? String(valueA).localeCompare(String(valueB))
+        : String(valueB).localeCompare(String(valueA));
+    }
+  });
+
+  const paginatedData = sortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
+  const isAllSelected =
+    paginatedData.length > 0 && paginatedData.every((row) => selected.includes(row.id));
+  const isIndeterminate = selected.length > 0 && !isAllSelected;
 
   return (
-    <Paper elevation={3}>
-      <TableContainer>
-        <Table
-          sx={{
-            '& .MuiTableCell-root': {
-              borderBottom: 'none',
-            },
-          }}
-        >
-          <TableHead>
-            <TableRow>
-              <TableCell />
-              {['ID', 'NAME', 'AGE', 'LOCATION', 'CONTACT'].map((col) => (
-                <TableCell key={col}>
-                  <Typography fontWeight="light">{col}</Typography>
+    <Box p={3}>
+      <Paper>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: '#d24d19' }}>
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    sx={{ color: 'white', '&.Mui-checked': { color: 'white' } }}
+                    checked={isAllSelected}
+                    indeterminate={isIndeterminate}
+                    onChange={handleSelectAll}
+                  />
                 </TableCell>
-              ))}
-            </TableRow>
 
-            {/* Filter Row */}
-            <TableRow>
-              <TableCell />
+                {(['id', 'name', 'age', 'location', 'contact'] as (keyof RowData)[]).map(
+                  (column) => (
+                    <TableCell key={column} sx={{ color: 'white' }}>
+                      <TableSortLabel
+                        active={orderBy === column}
+                        direction={orderBy === column ? order : 'asc'}
+                        onClick={() => handleSort(column)}
+                        sx={{
+                          color: 'white',
+                          '&.Mui-active': { color: 'white' },
+                          '& .MuiTableSortLabel-icon': { color: 'white !important' },
+                        }}
+                      >
+                        <strong>{column.toUpperCase()}</strong>
+                      </TableSortLabel>
 
-              {/* ID */}
-              <TableCell>
-                <TextField
-                  size="small"
-                  value={filters.id}
-                  onChange={(e) => setFilters({ ...filters, id: e.target.value })}
-                  sx={{ '& .MuiInputBase-root': { height: 30, fontSize: 13 } }}
-                />
-              </TableCell>
-
-              {/* NAME */}
-              <TableCell>
-                <TextField
-                  size="small"
-                  value={filters.name}
-                  onChange={(e) => setFilters({ ...filters, name: e.target.value })}
-                  sx={{ '& .MuiInputBase-root': { height: 30, fontSize: 13 } }}
-                />
-              </TableCell>
-
-              {/* AGE */}
-              <TableCell>
-                <TextField
-                  size="small"
-                  value={filters.age}
-                  onChange={(e) => setFilters({ ...filters, age: e.target.value })}
-                  sx={{ '& .MuiInputBase-root': { height: 30, fontSize: 13 } }}
-                />
-              </TableCell>
-
-              {/* LOCATION - Autocomplete Dropdown */}
-              <TableCell>
-                <Autocomplete
-                  size="small"
-                  options={uniqueLocations}
-                  value={filters.location || null}
-                  onChange={(_, newValue) =>
-                    setFilters({
-                      ...filters,
-                      location: newValue || '',
-                    })
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      sx={{
-                        '& .MuiInputBase-root': {
-                          height: 30,
-                          fontSize: 13,
-                        },
-                      }}
-                    />
-                  )}
-                />
-              </TableCell>
-
-              {/* CONTACT */}
-              <TableCell>
-                <TextField
-                  size="small"
-                  value={filters.contact}
-                  onChange={(e) => setFilters({ ...filters, contact: e.target.value })}
-                  sx={{ '& .MuiInputBase-root': { height: 30, fontSize: 13 } }}
-                />
-              </TableCell>
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {paginatedData.map((row) => (
-              <TableRow key={row.id}>
-                <TableCell />
-                <TableCell>{row.id}</TableCell>
-                <TableCell>{row.name}</TableCell>
-                <TableCell>{row.age}</TableCell>
-                <TableCell>{row.location}</TableCell>
-                <TableCell>{row.contact}</TableCell>
+                      {column === 'location' ? (
+                        <Autocomplete
+                          size="small"
+                          options={locationOptions}
+                          value={filters.location || null}
+                          onChange={(_, newValue) => handleFilterChange('location', newValue || '')}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              placeholder="Select Location"
+                              sx={{ mt: 1, backgroundColor: 'white', borderRadius: 1 }}
+                            />
+                          )}
+                        />
+                      ) : (
+                        <TextField
+                          size="small"
+                          value={filters[column]}
+                          onChange={(e) => handleFilterChange(column, e.target.value)}
+                          placeholder={`Filter ${column}`}
+                          sx={{ mt: 1, backgroundColor: 'white', borderRadius: 1 }}
+                        />
+                      )}
+                    </TableCell>
+                  ),
+                )}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
 
-      <TablePagination
-        component="div"
-        count={filteredData.length}
-        page={page}
-        onPageChange={(_, newPage) => setPage(newPage)}
-        rowsPerPage={rowsPerPage}
-        rowsPerPageOptions={[8]}
-      />
-    </Paper>
+            <TableBody>
+              {paginatedData.map((row) => (
+                <TableRow
+                  key={row.id}
+                  sx={{
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease',
+                    '&:hover': { backgroundColor: '#af415e !important' },
+                  }}
+                >
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      checked={selected.includes(row.id)}
+                      onChange={() => handleCheckboxChange(row.id)}
+                    />
+                  </TableCell>
+                  <TableCell>{row.id}</TableCell>
+                  <TableCell>{row.name}</TableCell>
+                  <TableCell>{row.age}</TableCell>
+                  <TableCell>{row.location}</TableCell>
+                  <TableCell>{row.contact}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        <TablePagination
+          component="div"
+          count={sortedData.length}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          rowsPerPageOptions={[4, 8, 10]}
+        />
+      </Paper>
+    </Box>
   );
 }

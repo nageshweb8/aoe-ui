@@ -99,13 +99,26 @@ export default function StickyHeadTable() {
                   key={column.id}
                   align={column.align}
                   style={{ minWidth: column.minWidth }}
+                  sx={{
+                    backgroundColor: 'blue',
+                    color: 'white',
+                    fontWeight: 'bold',
+                  }}
                 >
                   {column.label}
                 </TableCell>
               ))}
             </TableRow>
           </TableHead>
-          <TableBody>
+          <TableBody
+            sx={{
+              '& .MuiTableRow-root:hover': {
+                backgroundColor: 'orange',
+                color: 'white',
+                cursor: 'pointer',
+              },
+            }}
+          >
             {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
               return (
                 <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
