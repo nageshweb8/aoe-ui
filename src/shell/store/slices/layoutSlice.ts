@@ -32,4 +32,5 @@ const layoutSlice = createSlice({
 export const { toggleSidebar, setSidebarOpen, toggleSidebarCollapse, setSidebarCollapsed } =
   layoutSlice.actions;
 
+export { layoutSlice };
 export const layoutReducer = layoutSlice.reducer;

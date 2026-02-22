@@ -1,5 +1,7 @@
 import {
   AlertTriangle,
+  Bell,
+  Building2,
   CopyPlus,
   FileBarChart,
   FileCheck,
@@ -10,6 +12,8 @@ import {
   Receipt,
   ScrollText,
   Settings,
+  Shield,
+  Users,
 } from 'lucide-react';
 
 export interface NavItem {
@@ -37,7 +41,15 @@ export const navigation: readonly NavSection[] = [
   },
   {
     label: 'Certificate of Insurance',
-    items: [{ title: 'COI Verification', path: '/certificate-of-insurance', icon: FileCheck }],
+    items: [
+      { title: 'COI Dashboard', path: '/certificate-of-insurance/dashboard', icon: Shield },
+      { title: 'Vendors', path: '/certificate-of-insurance/vendors', icon: Users },
+      { title: 'COI Tracking', path: '/certificate-of-insurance/tracking', icon: FileCheck },
+      { title: 'Buildings', path: '/certificate-of-insurance/buildings', icon: Building2 },
+      { title: 'Reports', path: '/certificate-of-insurance/reports', icon: FileBarChart },
+      { title: 'Notifications', path: '/certificate-of-insurance/notifications', icon: Bell },
+      { title: 'COI Settings', path: '/certificate-of-insurance/settings', icon: Settings },
+    ],
   },
   {
     label: 'Tools',

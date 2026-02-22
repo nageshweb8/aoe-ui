@@ -21,6 +21,7 @@ export { navigation } from './navigation';
 export { Providers } from './providers';
 export type { AppDispatch, RootState } from './store';
 export {
+  rootReducer,
   setSidebarCollapsed,
   setSidebarOpen,
   store,

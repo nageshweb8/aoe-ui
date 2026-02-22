@@ -6,4 +6,4 @@ export {
   toggleSidebarCollapse,
 } from './slices/layoutSlice';
 export type { AppDispatch, RootState } from './store';
-export { store } from './store';
+export { rootReducer, store } from './store';
